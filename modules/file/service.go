@@ -26,6 +26,8 @@ import (
 	"go.uber.org/zap"
 )
 
+const FileServiceS3 config.FileService = "s3"
+
 type IUploadService interface {
 	UploadFile(filePath string, contentType string, copyFileWriter func(io.Writer) error) (map[string]interface{}, error)
 	// 获取下载地址
@@ -47,6 +49,8 @@ func NewService(ctx *config.Context) IService {
 		uploadService = NewServiceMinio(ctx)
 	} else if service == config.FileServiceAliyunOSS {
 		uploadService = NewServiceOSS(ctx)
+	} else if service == FileServiceS3 {
+		uploadService = NewServiceS3(ctx)
 	} else {
 		uploadService = NewSeaweedFS(ctx)
 	}
