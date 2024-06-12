@@ -1069,6 +1069,24 @@ func (u *User) sentWelcomeMsg(publicIP, uid string) {
 	if err != nil {
 		u.Error("获取应用配置错误", zap.Error(err))
 	}
+	onlineM, err := u.onlineDB.queryLastOnlineDeviceWithUID(uid)
+	var online int
+	sendMsg := true
+	//var lastOffline int
+	//var deviceFlag config.DeviceFlag
+	var lastOnlineTime time.Time
+	if onlineM != nil {
+		online = onlineM.Online
+		//lastOffline = onlineM.LastOffline
+		//deviceFlag = config.DeviceFlag(onlineM.DeviceFlag)
+		lastOnlineTime = time.Unix(int64(online), 0) // 将在线时间戳转换为 time.Time
+		if time.Since(lastOnlineTime) > 24*time.Hour {
+			sendMsg = true
+		} else {
+			sendMsg = false
+		}
+	}
+
 	if appconfig.SendWelcomeMessageOn == 0 {
 		return
 	}
@@ -1082,24 +1100,26 @@ func (u *User) sentWelcomeMsg(publicIP, uid string) {
 		content = appconfig.WelcomeMessage
 	}
 	if lastLoginLog != nil {
-		ipStr := fmt.Sprintf("上次的登录信息：%s %s\n本次登录的信息：%s %s", lastLoginLog.LoginIP, lastLoginLog.CreateAt, publicIP, util.ToyyyyMMddHHmmss(time.Now()))
-		sentContent = fmt.Sprintf("%s\n%s", content, ipStr)
+		//ipStr := fmt.Sprintf("上次的登录信息：%s %s\n本次登录的信息：%s %s", lastLoginLog.LoginIP, lastLoginLog.CreateAt, publicIP, util.ToyyyyMMddHHmmss(time.Now()))
+		sentContent = fmt.Sprintf("%s", content)
 	} else {
-		ipStr := fmt.Sprintf("本次登录的信息：%s %s", publicIP, util.ToyyyyMMddHHmmss(time.Now()))
-		sentContent = fmt.Sprintf("%s\n%s", content, ipStr)
+		//ipStr := fmt.Sprintf("本次登录的信息：%s %s", publicIP, util.ToyyyyMMddHHmmss(time.Now()))
+		sentContent = fmt.Sprintf("%s", content)
 	}
-	err = u.ctx.SendMessage(&config.MsgSendReq{
-		FromUID:     u.ctx.GetConfig().Account.SystemUID,
-		ChannelID:   uid,
-		ChannelType: common.ChannelTypePerson.Uint8(),
-		Payload: []byte(util.ToJson(map[string]interface{}{
-			"content": sentContent,
-			"type":    common.Text,
-		})),
-		Header: config.MsgHeader{
-			RedDot: 1,
-		},
-	})
+	if sendMsg {
+		err = u.ctx.SendMessage(&config.MsgSendReq{
+			FromUID:     u.ctx.GetConfig().Account.SystemUID,
+			ChannelID:   uid,
+			ChannelType: common.ChannelTypePerson.Uint8(),
+			Payload: []byte(util.ToJson(map[string]interface{}{
+				"content": sentContent,
+				"type":    common.Text,
+			})),
+			Header: config.MsgHeader{
+				RedDot: 1,
+			},
+		})
+	}
 	if err != nil {
 		u.Error("发送登录消息欢迎消息失败", zap.Error(err))
 	}
