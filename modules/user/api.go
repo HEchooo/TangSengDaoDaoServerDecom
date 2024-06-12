@@ -1076,7 +1076,7 @@ func (u *User) sentWelcomeMsg(publicIP, uid string) {
 	//var deviceFlag config.DeviceFlag
 	var lastOnlineTime time.Time
 	if onlineM != nil {
-		online = onlineM.Online
+		online = onlineM.LastOnline
 		//lastOffline = onlineM.LastOffline
 		//deviceFlag = config.DeviceFlag(onlineM.DeviceFlag)
 		lastOnlineTime = time.Unix(int64(online), 0) // 将在线时间戳转换为 time.Time
