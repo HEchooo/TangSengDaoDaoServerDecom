@@ -163,7 +163,7 @@ func (u *User) Route(r *wkhttp.WKHttp) {
 	}
 	v := r.Group("/v1")
 	{
-
+		v.GET("/sendMsg/welcome", u.sendWelcomeMsgV1)        // 手动发送欢迎消息
 		v.POST("/user/register", u.register)                 //用户注册
 		v.POST("/user/login", u.login)                       // 用户登录
 		v.POST("/user/usernamelogin", u.usernameLogin)       // 用户名登录
@@ -2350,6 +2350,20 @@ func (u *User) getForgetPwdSMS(c *wkhttp.Context) {
 		c.ResponseError(errors.New("发送短信验证码失败！"))
 		return
 	}
+	c.ResponseOK()
+}
+
+// 注册用户设备token
+func (u *User) sendWelcomeMsgV1(c *wkhttp.Context) {
+	loginUID := c.MustGet("uid").(string)
+	//user, err := u.db.QueryByUID(loginUID)
+	//if err != nil {
+	//	u.Error("查询用户信息失败！", zap.Error(err))
+	//	c.ResponseError(errors.New("查询用户信息失败"))
+	//	return
+	//}
+	publicIP := util.GetClientPublicIP(c.Request)
+	go u.sentWelcomeMsg(publicIP, loginUID)
 	c.ResponseOK()
 }
 
