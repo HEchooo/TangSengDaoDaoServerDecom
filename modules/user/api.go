@@ -1084,6 +1084,7 @@ func (u *User) sentWelcomeMsg(publicIP, uid string) {
 			sendMsg = true
 		} else {
 			sendMsg = false
+			u.Log.Info("用户登入欢迎语24h内, 只发送一次.", zap.String("uid", uid))
 		}
 	}
 
