@@ -366,8 +366,23 @@ func (u *User) mallOAuth(c *wkhttp.Context) {
 		c.ResponseError(errors.New("redis set error"))
 		return
 	}
-	time.Sleep(time.Second * 3)      // 这里等待2秒，让前端有足够的时间跳转到登录成功页面。
-	c.String(http.StatusOK, "登录失败！") // 如果一切正常，理论上是看不到这个返回结果的
+	//time.Sleep(time.Second * 3)      // 这里等待2秒，让前端有足够的时间跳转到登录成功页面。
+	// c.String(http.StatusOK, "登录失败！") // 如果一切正常，理论上是看不到这个返回结果的
+	// 静默登录,重新登录下IM
+	if userInfo == nil || userInfoM.IsDestroy == 1 {
+		c.ResponseError(errors.New("用户不存在"))
+		return
+	}
+	loginResp, err = u.execLogin(userInfoM, deviceFlag, nil, loginSpanCtx)
+	if err != nil {
+		c.ResponseError(err)
+		return
+	}
+	// 发送登录消息
+	publicIP := util.GetClientPublicIP(c.Request)
+	go u.sentWelcomeMsg(publicIP, userInfoM.UID)
+	c.Response(loginResp)
+
 }
 
 func (u *User) requestGiteeUserInfo(accessToken string) (*giteeUserInfo, error) {
