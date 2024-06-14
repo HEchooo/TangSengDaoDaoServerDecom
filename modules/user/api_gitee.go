@@ -456,7 +456,7 @@ func (u *User) requestMallAccessToken(code string, env string) (*MallUser, error
 		fmt.Println("Error unmarshaling JSON:", err)
 		return nil, err
 	}
-	if response.Code != 200 {
+	if response.Code != 0 {
 		return nil, fmt.Errorf("获取电商用户信息失败, unexpected response code: %d, message: %s", response.Code, response.Message)
 	}
 
