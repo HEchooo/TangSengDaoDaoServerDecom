@@ -676,3 +676,23 @@ func TestDeleteUserRedDot(t *testing.T) {
 	s.GetRoute().ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 }
+
+func TestSendWelcome(t *testing.T) {
+	var online int
+	sendMsg := true
+	//var lastOffline int
+	//var deviceFlag config.DeviceFlag
+	var lastOnlineTime time.Time
+	online = 1718103585
+	//lastOffline = onlineM.LastOffline
+	//deviceFlag = config.DeviceFlag(onlineM.DeviceFlag)
+	lastOnlineTime = time.Unix(int64(online), 0) // 将在线时间戳转换为 time.Time
+	if time.Since(lastOnlineTime) > 24*time.Hour {
+		sendMsg = true
+	} else {
+		sendMsg = false
+	}
+
+	t.Errorf("dada %t", sendMsg)
+
+}
