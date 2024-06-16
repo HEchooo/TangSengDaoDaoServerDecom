@@ -119,7 +119,8 @@ func (m *Message) Route(r *wkhttp.WKHttp) {
 	{
 		reactions.POST("", m.addOrCancelReaction) // 添加或取消回应
 	}
-	reaction := r.Group("/v1/reaction", m.ctx.AuthMiddleware(r))
+	reaction := r.Group("/\v"+
+		"1/reaction", m.ctx.AuthMiddleware(r))
 	{
 		reaction.POST("/sync", m.syncReaction)
 	}

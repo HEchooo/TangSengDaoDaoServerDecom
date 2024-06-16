@@ -127,6 +127,7 @@ func (u *User) Route(r *wkhttp.WKHttp) {
 
 	user := r.Group("/v1/user", u.ctx.AuthMiddleware(r))
 	{
+		user.GET("/sendMsg/welcome", u.sendWelcomeMsgV1)           // 手动发送欢迎消息
 		user.POST("/device_token", u.registerUserDeviceToken)      // 注册用户设备
 		user.DELETE("/device_token", u.unregisterUserDeviceToken)  // 卸载用户设备
 		user.POST("/device_badge", u.registerUserDeviceBadge)      // 上传设备红点数量
@@ -163,7 +164,6 @@ func (u *User) Route(r *wkhttp.WKHttp) {
 	}
 	v := r.Group("/v1")
 	{
-
 		v.POST("/user/register", u.register)                 //用户注册
 		v.POST("/user/login", u.login)                       // 用户登录
 		v.POST("/user/usernamelogin", u.usernameLogin)       // 用户名登录
@@ -194,6 +194,7 @@ func (u *User) Route(r *wkhttp.WKHttp) {
 		// gitee
 		v.GET("/user/gitee", u.gitee)            // gitee认证页面
 		v.GET("/user/oauth/gitee", u.giteeOAuth) // gitee登录
+		v.GET("/user/oauth/mall", u.mallOAuth)   // mall登录
 
 	}
 
@@ -1069,6 +1070,25 @@ func (u *User) sentWelcomeMsg(publicIP, uid string) {
 	if err != nil {
 		u.Error("获取应用配置错误", zap.Error(err))
 	}
+	onlineM, err := u.onlineDB.queryLastOnlineDeviceWithUID(uid)
+	var online int
+	sendMsg := true
+	//var lastOffline int
+	//var deviceFlag config.DeviceFlag
+	var lastOnlineTime time.Time
+	if onlineM != nil {
+		online = onlineM.LastOnline
+		//lastOffline = onlineM.LastOffline
+		//deviceFlag = config.DeviceFlag(onlineM.DeviceFlag)
+		lastOnlineTime = time.Unix(int64(online), 0) // 将在线时间戳转换为 time.Time
+		if time.Since(lastOnlineTime) > 24*time.Hour {
+			sendMsg = true
+		} else {
+			sendMsg = false
+			u.Log.Info("用户登入欢迎语24h内, 只发送一次.", zap.String("uid", uid))
+		}
+	}
+
 	if appconfig.SendWelcomeMessageOn == 0 {
 		return
 	}
@@ -1082,24 +1102,26 @@ func (u *User) sentWelcomeMsg(publicIP, uid string) {
 		content = appconfig.WelcomeMessage
 	}
 	if lastLoginLog != nil {
-		ipStr := fmt.Sprintf("上次的登录信息：%s %s\n本次登录的信息：%s %s", lastLoginLog.LoginIP, lastLoginLog.CreateAt, publicIP, util.ToyyyyMMddHHmmss(time.Now()))
-		sentContent = fmt.Sprintf("%s\n%s", content, ipStr)
+		//ipStr := fmt.Sprintf("上次的登录信息：%s %s\n本次登录的信息：%s %s", lastLoginLog.LoginIP, lastLoginLog.CreateAt, publicIP, util.ToyyyyMMddHHmmss(time.Now()))
+		sentContent = fmt.Sprintf("%s", content)
 	} else {
-		ipStr := fmt.Sprintf("本次登录的信息：%s %s", publicIP, util.ToyyyyMMddHHmmss(time.Now()))
-		sentContent = fmt.Sprintf("%s\n%s", content, ipStr)
+		//ipStr := fmt.Sprintf("本次登录的信息：%s %s", publicIP, util.ToyyyyMMddHHmmss(time.Now()))
+		sentContent = fmt.Sprintf("%s", content)
 	}
-	err = u.ctx.SendMessage(&config.MsgSendReq{
-		FromUID:     u.ctx.GetConfig().Account.SystemUID,
-		ChannelID:   uid,
-		ChannelType: common.ChannelTypePerson.Uint8(),
-		Payload: []byte(util.ToJson(map[string]interface{}{
-			"content": sentContent,
-			"type":    common.Text,
-		})),
-		Header: config.MsgHeader{
-			RedDot: 1,
-		},
-	})
+	if sendMsg {
+		err = u.ctx.SendMessage(&config.MsgSendReq{
+			FromUID:     u.ctx.GetConfig().Account.SystemUID,
+			ChannelID:   uid,
+			ChannelType: common.ChannelTypePerson.Uint8(),
+			Payload: []byte(util.ToJson(map[string]interface{}{
+				"content": sentContent,
+				"type":    common.Text,
+			})),
+			Header: config.MsgHeader{
+				RedDot: 1,
+			},
+		})
+	}
 	if err != nil {
 		u.Error("发送登录消息欢迎消息失败", zap.Error(err))
 	}
@@ -2330,6 +2352,27 @@ func (u *User) getForgetPwdSMS(c *wkhttp.Context) {
 		c.ResponseError(errors.New("发送短信验证码失败！"))
 		return
 	}
+	c.ResponseOK()
+}
+
+// 注册用户设备token
+func (u *User) sendWelcomeMsgV1(c *wkhttp.Context) {
+	loginUID := c.MustGet("uid").(string)
+	user, err := u.db.QueryByUID(loginUID)
+	if err != nil || user == nil {
+		u.Error("查询用户信息失败！", zap.Error(err))
+		c.ResponseError(errors.New("查询用户信息失败"))
+		return
+	}
+	publicIP := util.GetClientPublicIP(c.Request)
+	if publicIP == "" {
+		u.Log.Error("无法获取用户的公共IP")
+	}
+	// 使用 goroutine 异步发送欢迎消息
+	go func() {
+		u.sentWelcomeMsg(publicIP, loginUID)
+	}()
+
 	c.ResponseOK()
 }
 

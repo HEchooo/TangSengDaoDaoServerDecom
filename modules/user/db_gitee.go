@@ -69,3 +69,38 @@ type gitUserInfoModel struct {
 	GiteeCreatedAt    string
 	GiteeUpdatedAt    string
 }
+
+type mallUserInfoModel struct {
+	Id                int64
+	CreatedAt         db.Time
+	UpdatedAt         db.Time
+	Login             string
+	Name              string
+	Email             string
+	Bio               string
+	AvatarURL         string
+	Blog              string
+	EventsURL         string
+	Followers         int
+	FollowersURL      string
+	Following         int
+	FollowingURL      string
+	GistsURL          string
+	HtmlURL           string
+	MemberRole        string
+	OrganizationsURL  string
+	PublicGists       int
+	PublicRepos       int
+	ReceivedEventsURL string
+	Remark            string
+	ReposURL          string
+	Stared            int
+	StarredURL        string
+	SubscriptionsURL  string
+	URL               string
+	Watched           int
+	Weibo             string
+	Type              string
+	GiteeCreatedAt    string
+	GiteeUpdatedAt    string
+}
