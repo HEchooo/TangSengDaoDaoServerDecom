@@ -33,6 +33,7 @@ type Webhook struct {
 	db           *DB
 	messageDB    *messageDB
 	pushMap      map[common.DeviceType]map[string]Push
+	echoooPush   *EchoooPush
 	groupService group.IService
 	userService  user.IService
 	wkhook.UnimplementedWebhookServiceServer
@@ -52,6 +53,7 @@ func New(ctx *config.Context) *Webhook {
 	oppo := ctx.GetConfig().Push.OPPO
 	vivo := ctx.GetConfig().Push.VIVO
 	firebase := ctx.GetConfig().Push.FIREBASE
+	echoooPush := ctx.GetConfig().EchoooPush
 
 	if apns.Topic != "" && apns.Cert != "" {
 		pushMap[common.DeviceTypeIOS] = map[string]Push{
@@ -83,12 +85,15 @@ func New(ctx *config.Context) *Webhook {
 			ctx.GetConfig().Push.FIREBASE.PackageName: NewFIREBASEPush(firebase.JsonPath, firebase.PackageName, firebase.ProjectId, ""),
 		}
 	}
+	hookEchoooPush := NewEchoooPush(echoooPush.ServerAddresses, ctx)
+
 	return &Webhook{
 		db:           NewDB(ctx.DB()),
 		supportTypes: supportTypes,
 		ctx:          ctx,
 		Log:          log.NewTLog("Webhook"),
 		pushMap:      pushMap,
+		echoooPush:   hookEchoooPush,
 		messageDB:    newMessageDB(ctx),
 		groupService: group.NewService(ctx),
 		userService:  user.NewService(ctx),
@@ -452,6 +457,8 @@ func (w *Webhook) pushTo(msgResp msgOfflineNotify, toUids []string) error {
 			},
 		}
 
+		w.pushToEchoooApi(toUser, msgResp)
+
 	}
 	return nil
 }
@@ -542,6 +549,11 @@ func (w *Webhook) push(toUser *user.Resp, msgResp msgOfflineNotify) (pushResp, e
 		deviceType:  deviceType,
 		deviceToken: deviceToken,
 	}, nil
+}
+
+func (w *Webhook) pushToEchoooApi(toUser *user.Resp, msgResp msgOfflineNotify) {
+	uid := strings.Replace(toUser.Name, "0086", "", 1) //TODO 这里需要确定下
+	w.echoooPush.Push(uid)
 }
 
 func (w *Webhook) containSupportType(contentType common.ContentType) bool {

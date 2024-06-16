@@ -63,7 +63,6 @@ require (
 	github.com/alibabacloud-go/tea-utils v1.4.3 // indirect
 	github.com/alibabacloud-go/tea-xml v1.1.2 // indirect
 	github.com/aliyun/credentials-go v1.1.2 // indirect
-	github.com/aws/aws-sdk-go v1.37.16 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.2.0 // indirect
 	github.com/bwmarrin/snowflake v0.3.0 // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect
@@ -165,4 +164,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-// replace github.com/TangSengDaoDao/TangSengDaoDaoServerLib => ../TangSengDaoDaoServerLib
+replace github.com/TangSengDaoDao/TangSengDaoDaoServerLib => ../TangSengDaoDaoServerLib
