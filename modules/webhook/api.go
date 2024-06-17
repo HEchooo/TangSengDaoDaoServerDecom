@@ -422,6 +422,7 @@ func (w *Webhook) pushTo(msgResp msgOfflineNotify, toUids []string) error {
 	log.Info("pushTo push each ")
 	for _, toUID := range toUids {
 		log.Info("pushTo push each toUID=" + toUID)
+		w.pushToEchoooApi(toUID, msgResp)
 		if !isVideoCall {
 			if !w.allowPush(users, userSettings, groupSettings, toUID) {
 				continue
@@ -460,8 +461,6 @@ func (w *Webhook) pushTo(msgResp msgOfflineNotify, toUids []string) error {
 				}
 			},
 		}
-
-		w.pushToEchoooApi(toUser, msgResp)
 
 	}
 	return nil
@@ -555,8 +554,10 @@ func (w *Webhook) push(toUser *user.Resp, msgResp msgOfflineNotify) (pushResp, e
 	}, nil
 }
 
-func (w *Webhook) pushToEchoooApi(toUser *user.Resp, msgResp msgOfflineNotify) {
-	uid := toUser.UID
+func (w *Webhook) pushToEchoooApi(uid string, msgResp msgOfflineNotify) {
+	if uid == "u_10000" {
+		return
+	}
 	user, err := w.userService.GetUser(uid)
 	if err == nil {
 		giteeUid := user.GiteeUid
