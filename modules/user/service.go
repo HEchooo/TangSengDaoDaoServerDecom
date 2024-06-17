@@ -759,6 +759,7 @@ type Resp struct {
 	MsgExpireSecond int64
 	CreatedAt       int64 // 注册时间 10位时间戳
 	IsDestroy       int   // 是否注销
+	GiteeUid        string
 }
 
 func newResp(m *Model) *Resp {
@@ -774,6 +775,7 @@ func newResp(m *Model) *Resp {
 		MsgExpireSecond: m.MsgExpireSecond,
 		IsDestroy:       m.IsDestroy,
 		CreatedAt:       time.Time(m.CreatedAt).Unix(),
+		GiteeUid:        m.GiteeUID,
 	}
 }
 
