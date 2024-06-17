@@ -353,6 +353,7 @@ func (w *Webhook) handleMsgOffline(data []byte) error {
 }
 
 func (w *Webhook) pushTo(msgResp msgOfflineNotify, toUids []string) error {
+	log.Info("pushTo toUids=" + strings.Join(toUids, ","))
 	setting := config.SettingFromUint8(msgResp.Setting)
 	isVideoCall := false
 	if !setting.Signal { // 只解析未加密的消息
@@ -418,7 +419,9 @@ func (w *Webhook) pushTo(msgResp msgOfflineNotify, toUids []string) error {
 		}
 	}
 
+	log.Info("pushTo push each ")
 	for _, toUID := range toUids {
+		log.Info("pushTo push each toUID=" + toUID)
 		if !isVideoCall {
 			if !w.allowPush(users, userSettings, groupSettings, toUID) {
 				continue
