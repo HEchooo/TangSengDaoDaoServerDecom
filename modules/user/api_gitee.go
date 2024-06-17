@@ -577,7 +577,7 @@ func (g *MallUser) toModel() *gitUserInfoModel {
 	m := &gitUserInfoModel{
 		Login:             g.UserID,
 		Name:              g.UserID,
-		AvatarURL:         "g.Photo",
+		AvatarURL:         "",
 		Bio:               g.Gender,
 		Blog:              "",
 		Email:             g.Email,
@@ -593,12 +593,12 @@ func (g *MallUser) toModel() *gitUserInfoModel {
 		PublicRepos:       1,
 		ReceivedEventsURL: "g.ReceivedEventsURL",
 		ReposURL:          "g.ReposURL",
-		Stared:            1,
+		Stared:            0,
 		StarredURL:        "g.StarredURL",
 		SubscriptionsURL:  "g.SubscriptionsURL",
 		Type:              "1",
 		Weibo:             "g.Weibo",
-		Watched:           1,
+		Watched:           0,
 		GiteeCreatedAt:    g.CreateTime,
 		GiteeUpdatedAt:    "g.UpdatedAt",
 	}
