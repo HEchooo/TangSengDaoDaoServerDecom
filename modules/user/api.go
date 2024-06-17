@@ -462,9 +462,9 @@ func (u *User) userIM(c *wkhttp.Context) {
 	}
 
 	// 修改 ws_addr 字段
-	if ok :=; ok {
-		resultMap["ws_addr"] = "wss://im-ws.valleysound.xyz"
-	}
+	//if ok :=; ok {
+	resultMap["ws_addr"] = "wss://im-ws.valleysound.xyz"
+	//}
 
 	c.JSON(resp.StatusCode, resultMap)
 }
@@ -1026,7 +1026,7 @@ func (u *User) execLogin(userInfo *Model, flag config.DeviceFlag, device *device
 				return nil, errors.New("清除旧token数据错误")
 			}
 		}
-	} else {                                   // PC暂时不执行删除操作，因为PC可以同时登陆
+	} else { // PC暂时不执行删除操作，因为PC可以同时登陆
 		if strings.TrimSpace(oldToken) != "" { // 如果是web或pc类设备 因为支持多登所以这里依然使用老token
 			token = oldToken
 		}
