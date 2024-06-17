@@ -34,11 +34,8 @@ func (m *EchoooPush) Push(uid string) error {
 			m.Log.Debug("")
 			reqParam := SendSinglePushReq{
 				userId:     uid,
-				deviceId:   "",
-				lang:       "zh-cn",
-				pushType:   2,
-				templateId: 23,
-				params:     make(map[string]interface{}),
+				pushType:   3,
+				templateId: 27,
 			}
 			jsonData, _ := json.Marshal(reqParam)
 			resp, err := http.Post("http://"+server+"/inner/push/sendNotice", "application/json", bytes.NewBuffer(jsonData))

@@ -312,6 +312,7 @@ func (w *Webhook) handleOnlineStatus(data []byte) error {
 }
 
 func (w *Webhook) handleMsgOffline(data []byte) error {
+	log.Info("handleMsgOffline")
 	var msgResp msgOfflineNotify
 	err := util.ReadJsonByByte(data, &msgResp)
 	if err != nil {
