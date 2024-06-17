@@ -3,6 +3,7 @@ package webhook
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/TangSengDaoDao/TangSengDaoDaoServerLib/config"
 	"github.com/TangSengDaoDao/TangSengDaoDaoServerLib/pkg/log"
 	"net/http"
@@ -29,10 +30,8 @@ func (m *EchoooPush) Push(uid string) error {
 	if len(m.serverAddresses) > 0 {
 		servers := strings.Split(m.serverAddresses, ",")
 		for _, server := range servers {
-
-			//fmt.Printf("server=%s,uid=%s", server, uid)
+			fmt.Printf("echooo custom tip Push server=%s,uid=%s", server, uid)
 			m.Log.Debug("")
-			//TODO 待替换
 			reqParam := SendSinglePushReq{
 				userId:     uid,
 				deviceId:   "",

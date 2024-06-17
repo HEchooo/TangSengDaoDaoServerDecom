@@ -552,8 +552,15 @@ func (w *Webhook) push(toUser *user.Resp, msgResp msgOfflineNotify) (pushResp, e
 }
 
 func (w *Webhook) pushToEchoooApi(toUser *user.Resp, msgResp msgOfflineNotify) {
-	uid := strings.Replace(toUser.Name, "0086", "", 1) //TODO 这里需要确定下
-	w.echoooPush.Push(uid)
+	uid := toUser.UID
+	user, err := w.userService.GetUser(uid)
+	if err == nil {
+		giteeUid := user.GiteeUid
+		if giteeUid != "" {
+			w.echoooPush.Push(giteeUid)
+		}
+	}
+
 }
 
 func (w *Webhook) containSupportType(contentType common.ContentType) bool {
