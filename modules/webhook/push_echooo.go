@@ -3,9 +3,9 @@ package webhook
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/TangSengDaoDao/TangSengDaoDaoServerLib/config"
 	"github.com/TangSengDaoDao/TangSengDaoDaoServerLib/pkg/log"
+	"go.uber.org/zap"
 	"net/http"
 	"strings"
 )
@@ -30,8 +30,7 @@ func (m *EchoooPush) Push(uid string) error {
 	if len(m.serverAddresses) > 0 {
 		servers := strings.Split(m.serverAddresses, ",")
 		for _, server := range servers {
-			fmt.Printf("echooo custom tip Push server=%s,uid=%s", server, uid)
-			m.Log.Debug("")
+			m.Info("echooo inner Push server", zap.String("server", server), zap.String("uid", uid))
 			reqParam := SendSinglePushReq{
 				userId:     uid,
 				pushType:   3,
