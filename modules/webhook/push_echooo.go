@@ -3,11 +3,17 @@ package webhook
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/TangSengDaoDao/TangSengDaoDaoServerLib/config"
 	"github.com/TangSengDaoDao/TangSengDaoDaoServerLib/pkg/log"
 	"go.uber.org/zap"
 	"net/http"
 	"strings"
+	"time"
+)
+
+const (
+	ECHOOO_PUSH_UID = "tsdd:echooo:push_uid:"
 )
 
 type EchoooPush struct {
@@ -28,6 +34,19 @@ func NewEchoooPush(serverAddresses string, ctx *config.Context) *EchoooPush {
 // Push 推送
 func (m *EchoooPush) Push(uid string) error {
 	log.Info("EchoooPush serverAddresses", zap.String("serverAddresses", m.serverAddresses))
+
+	key := fmt.Sprintf("%s%s", ECHOOO_PUSH_UID, uid)
+	result, err := m.ctx.GetRedisConn().GetString(key)
+	if err != nil {
+		log.Info("pushToEchoooApi to get cache key error")
+		return err
+	}
+
+	if len(result) > 0 {
+		log.Info("uid " + uid + " has push in five minutes. ")
+		return nil
+	}
+
 	if len(m.serverAddresses) > 0 {
 		servers := strings.Split(m.serverAddresses, ",")
 		for _, server := range servers {
@@ -46,6 +65,8 @@ func (m *EchoooPush) Push(uid string) error {
 			} else {
 				break
 			}
+
+			m.ctx.GetRedisConn().SetAndExpire(key, "1", time.Minute*5)
 		}
 	}
 	return nil

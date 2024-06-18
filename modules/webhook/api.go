@@ -7,11 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"net"
-	"strconv"
-	"strings"
-
 	"github.com/TangSengDaoDao/TangSengDaoDaoServer/modules/group"
 	"github.com/TangSengDaoDao/TangSengDaoDaoServer/modules/user"
 	"github.com/TangSengDaoDao/TangSengDaoDaoServerLib/common"
@@ -23,6 +18,10 @@ import (
 	"github.com/TangSengDaoDao/TangSengDaoDaoServerLib/pkg/wkhttp"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"io/ioutil"
+	"net"
+	"strconv"
+	"strings"
 )
 
 // Webhook Webhook
@@ -312,7 +311,6 @@ func (w *Webhook) handleOnlineStatus(data []byte) error {
 }
 
 func (w *Webhook) handleMsgOffline(data []byte) error {
-	log.Info("handleMsgOffline")
 	var msgResp msgOfflineNotify
 	err := util.ReadJsonByByte(data, &msgResp)
 	if err != nil {
@@ -353,7 +351,6 @@ func (w *Webhook) handleMsgOffline(data []byte) error {
 }
 
 func (w *Webhook) pushTo(msgResp msgOfflineNotify, toUids []string) error {
-	log.Info("pushTo toUids=" + strings.Join(toUids, ","))
 	setting := config.SettingFromUint8(msgResp.Setting)
 	isVideoCall := false
 	if !setting.Signal { // 只解析未加密的消息
