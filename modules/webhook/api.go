@@ -560,6 +560,15 @@ type FeiShuWebhookPayload struct {
 	} `json:"content"`
 }
 
+// FeiShuWebhook 的响应
+type FeiShuWebhookResponse struct {
+	StatusCode    int      `json:"StatusCode"`
+	StatusMessage string   `json:"StatusMessage"`
+	Code          int      `json:"code"`
+	Data          struct{} `json:"data"`
+	Msg           string   `json:"msg"`
+}
+
 // SendFeiShuWebhook
 func SendFeiShuWebhook(url string, payload FeiShuWebhookPayload) error {
 	// 将 payload 序列化为 JSON
@@ -585,9 +594,22 @@ func SendFeiShuWebhook(url string, payload FeiShuWebhookPayload) error {
 	}
 	defer resp.Body.Close()
 
+	// 读取响应体
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read response body: %v", err)
+	}
+
+	// 解析响应 JSON
+	var webhookResp FeiShuWebhookResponse
+	err = json.Unmarshal(body, &webhookResp)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal response: %v", err)
+	}
+
 	// 检查响应状态码
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("received non-200 response: %d", resp.StatusCode)
+	if webhookResp.StatusCode != 0 {
+		return fmt.Errorf("received non-success response: %d, message: %s", webhookResp.StatusCode, webhookResp.StatusMessage)
 	}
 
 	return nil
