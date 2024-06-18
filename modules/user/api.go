@@ -950,8 +950,8 @@ func (u *User) execLoginAndRespose(userInfo *Model, flag config.DeviceFlag, devi
 
 	c.Response(result)
 
-	publicIP := util.GetClientPublicIP(c.Request)
-	go u.sentWelcomeMsg(publicIP, userInfo.UID)
+	//publicIP := util.GetClientPublicIP(c.Request)
+	//go u.sentWelcomeMsg(publicIP, userInfo.UID)
 }
 
 func (u *User) execLogin(userInfo *Model, flag config.DeviceFlag, device *deviceReq, loginSpanCtx context.Context) (*loginUserDetailResp, error) {
@@ -2557,7 +2557,7 @@ func (u *User) createUserWithRespAndTx(registerSpanCtx context.Context, createUs
 		u.Error("更新IM的token失败！", zap.Error(err))
 		return nil, err
 	}
-	go u.sentWelcomeMsg(publicIP, createUser.UID)
+	//go u.sentWelcomeMsg(publicIP, createUser.UID)
 
 	if u.ctx.GetConfig().ShortNo.NumOn {
 		err = u.commonService.SetShortnoUsed(userModel.ShortNo, "user")

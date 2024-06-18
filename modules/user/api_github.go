@@ -77,8 +77,8 @@ func (u *User) githubOAuth(c *wkhttp.Context) {
 			return
 		}
 		// 发送登录消息
-		publicIP := util.GetClientPublicIP(c.Request)
-		go u.sentWelcomeMsg(publicIP, userInfoM.UID)
+		//publicIP := util.GetClientPublicIP(c.Request)
+		//go u.sentWelcomeMsg(publicIP, userInfoM.UID)
 	} else {
 		// 创建用户
 		uid := util.GenerUUID()

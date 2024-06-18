@@ -142,8 +142,8 @@ func (u *User) giteeOAuth(c *wkhttp.Context) {
 			return
 		}
 		// 发送登录消息
-		publicIP := util.GetClientPublicIP(c.Request)
-		go u.sentWelcomeMsg(publicIP, userInfoM.UID)
+		//publicIP := util.GetClientPublicIP(c.Request)
+		//go u.sentWelcomeMsg(publicIP, userInfoM.UID)
 	} else {
 		// 创建用户
 		uid := util.GenerUUID()
@@ -282,8 +282,8 @@ func (u *User) mallOAuth(c *wkhttp.Context) {
 			return
 		}
 		// 发送登录消息
-		publicIP := util.GetClientPublicIP(c.Request)
-		go u.sentWelcomeMsg(publicIP, userInfoM.UID)
+		//publicIP := util.GetClientPublicIP(c.Request)
+		//go u.sentWelcomeMsg(publicIP, userInfoM.UID)
 	} else {
 		// 创建用户
 		uid := util.GenerUUID()
@@ -377,8 +377,8 @@ func (u *User) mallOAuth(c *wkhttp.Context) {
 		return
 	}
 	// 发送登录消息
-	publicIP := util.GetClientPublicIP(c.Request)
-	go u.sentWelcomeMsg(publicIP, userInfoM.UID)
+	//publicIP := util.GetClientPublicIP(c.Request)
+	//go u.sentWelcomeMsg(publicIP, userInfoM.UID)
 	c.Response(loginResp)
 
 }
