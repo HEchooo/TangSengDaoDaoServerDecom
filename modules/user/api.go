@@ -1089,8 +1089,10 @@ func (u *User) sentWelcomeMsg(publicIP, uid string) {
 		lastOnlineTime = time.Unix(int64(online), 0) // 将在线时间戳转换为 time.Time
 		if time.Since(lastOnlineTime) > 24*time.Hour {
 			sendMsg = true
+			//sendMsg = false
 		} else {
-			sendMsg = false
+			//sendMsg = false
+			sendMsg = true
 			u.Log.Info("用户登入欢迎语24h内, 只发送一次.", zap.String("uid", uid))
 		}
 	}
