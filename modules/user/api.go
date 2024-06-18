@@ -1097,7 +1097,7 @@ func (u *User) sentWelcomeMsg(publicIP, uid string) {
 		}
 	}
 
-	if appconfig.SendWelcomeMessageOn == 0 {
+	if appconfig.SendWelcomeMessageOn == 0 && !sendMsg {
 		return
 	}
 	time.Sleep(time.Second * 2)

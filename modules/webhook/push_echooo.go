@@ -13,7 +13,8 @@ import (
 )
 
 const (
-	ECHOOO_PUSH_UID = "tsdd:echooo:push_uid:"
+	ECHOOO_PUSH_UID   = "tsdd:echooo:push_uid:"
+	ECHOOO_FEISHU_UID = "tsdd:echooo:feishu_uid:"
 )
 
 type EchoooPush struct {

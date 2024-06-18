@@ -20,8 +20,10 @@ import (
 	"google.golang.org/grpc"
 	"io/ioutil"
 	"net"
+	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // Webhook Webhook
@@ -550,8 +552,76 @@ func (w *Webhook) push(toUser *user.Resp, msgResp msgOfflineNotify) (pushResp, e
 	}, nil
 }
 
+// 飞书机器人 Webhook 数据
+type FeiShuWebhookPayload struct {
+	MsgType string `json:"msg_type"`
+	Content struct {
+		Text string `json:"text"`
+	} `json:"content"`
+}
+
+// SendFeiShuWebhook
+func SendFeiShuWebhook(url string, payload FeiShuWebhookPayload) error {
+	// 将 payload 序列化为 JSON
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("failed to marshal payload: %v", err)
+	}
+
+	// 创建 HTTP 请求
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return fmt.Errorf("failed to create request: %v", err)
+	}
+
+	// 设置请求头
+	req.Header.Set("Content-Type", "application/json")
+
+	// 发送请求
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to send request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	// 检查响应状态码
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("received non-200 response: %d", resp.StatusCode)
+	}
+
+	return nil
+}
 func (w *Webhook) pushToEchoooApi(uid string, msgResp msgOfflineNotify) {
 	if uid == "u_10000" {
+		key := fmt.Sprintf("%s%s", ECHOOO_FEISHU_UID, uid)
+		result, err := w.ctx.GetRedisConn().GetString(key)
+		if err != nil {
+			log.Info("pushToFeiShu webhook get cache key error")
+			return
+		}
+
+		if len(result) > 0 {
+			log.Info("uid " + uid + " has push webhook in ten minutes. ")
+			return
+		}
+		// 发送飞书通知
+		webhookURL := "https://open.feishu.cn/open-apis/bot/v2/hook/2389d188-c620-49e3-acb4-f33ba710c35f"
+		// 示例 Webhook 负载
+		// 示例 Webhook 负载
+		var payload FeiShuWebhookPayload
+		payload.MsgType = "text"
+		payload.Content.Text = "<at user_id=\"all\">所有人</at> 有等待超过10分钟的客服消息, 需要处理."
+
+		// 发送 Webhook
+		err2 := SendFeiShuWebhook(webhookURL, payload)
+		if err2 != nil {
+			fmt.Printf("FeiShu webhook send failed: %v\n", err2)
+		} else {
+			w.ctx.GetRedisConn().SetAndExpire(key, "1", time.Minute*10)
+			fmt.Println("FeiShu webhook sent successfully")
+		}
+
 		return
 	}
 	user, err := w.userService.GetUser(uid)
