@@ -34,19 +34,20 @@ func NewEchoooPush(serverAddresses string, ctx *config.Context) *EchoooPush {
 
 // Push 推送
 func (m *EchoooPush) Push(uid string, content string) error {
-	log.Info("EchoooPush serverAddresses", zap.String("serverAddresses", m.serverAddresses))
+	m.Info("EchoooPush serverAddresses", zap.String("serverAddresses", m.serverAddresses))
 
 	key := fmt.Sprintf("%s%s", ECHOOO_PUSH_UID, uid)
 	result, err := m.ctx.GetRedisConn().GetString(key)
 	if err != nil {
-		log.Info("pushToEchoooApi to get cache key error")
+		m.Info("pushToEchoooApi to get cache key error")
 		return err
 	}
 
 	if len(result) > 0 {
-		log.Info("uid " + uid + " has push in five minutes. ")
+		m.Info("uid " + uid + " has push in five minutes. ")
 		return nil
 	}
+	m.Info("")
 
 	if len(m.serverAddresses) > 0 {
 		servers := strings.Split(m.serverAddresses, ",")
@@ -68,10 +69,10 @@ func (m *EchoooPush) Push(uid string, content string) error {
 				m.Info("Error reading response body:", zap.Error(err))
 				continue
 			} else {
+				m.ctx.GetRedisConn().SetAndExpire(key, "1", time.Minute*5)
 				break
 			}
 
-			m.ctx.GetRedisConn().SetAndExpire(key, "1", time.Minute*5)
 		}
 	}
 	return nil

@@ -653,11 +653,18 @@ func (w *Webhook) pushToEchoooApi(uid string, msgResp msgOfflineNotify) {
 			contentType := msgResp.ContentType
 			payload := string(msgResp.Payload)
 			log.Info("msgOfflineNotify", zap.Int("contentType", contentType), zap.String("payload", payload))
-			content := ""
-			if msgResp.ContentType == 1 && msgResp.PayloadMap != nil && msgResp.PayloadMap["type"] == 1 && msgResp.PayloadMap["content"] != nil {
-				content = fmt.Sprintf("%v", msgResp.PayloadMap["content"])
+			content := "请点击查看"
+			var result map[string]interface{}
+			// 将 JSON 字符串反序列化为 map
+			err := json.Unmarshal([]byte(payload), &result)
+			if err != nil {
+				log.Error("Error unmarshalling JSON: %v", zap.Error(err))
+				return
 			}
+			content = result["content"].(string)
+
 			log.Info("msgOfflineNotify", zap.Any("msgResp", msgResp))
+			log.Info("msgOfflineNotify", zap.String("im_content", content))
 			w.echoooPush.Push(giteeUid, content)
 		}
 	} else {
