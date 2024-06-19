@@ -524,14 +524,14 @@ type MallResponse struct {
 type MallUser struct {
 	ID              int     `json:"id"`
 	UserID          string  `json:"userId"`
-	Nickname        *string `json:"nickname"`
-	Description     *string `json:"description"`
+	Nickname        string  `json:"nickname"`
+	Description     string  `json:"description"`
 	Gender          string  `json:"gender"`
 	Birthday        *string `json:"birthday"`
 	Photo           string  `json:"photo"`
-	PhoneNumber     *string `json:"phoneNumber"`
+	PhoneNumber     string  `json:"phoneNumber"`
 	Email           string  `json:"email"`
-	ThirdPartyEmail *string `json:"thirdPartyEmail"`
+	ThirdPartyEmail string  `json:"thirdPartyEmail"`
 	SignUpType      int     `json:"signUpType"`
 	Platform        string  `json:"platform"`
 	GoogleUsername  *string `json:"googleUsername"`
@@ -578,17 +578,19 @@ func (g *giteeUserInfo) toModel() *gitUserInfoModel {
 
 func (g *MallUser) toModel() *gitUserInfoModel {
 	m := &gitUserInfoModel{
-		Login:             g.UserID,
-		Name:              g.UserID,
-		AvatarURL:         "",
-		Bio:               g.Gender,
-		Blog:              "",
-		Email:             g.Email,
-		Remark:            "",
-		EventsURL:         "g.EventsURL",
+		Login: g.UserID,
+		Name:  g.UserID,
+		// 存储电商头像, 电商上传头像时同步更新, 后期从这里获取头像给客服端
+		AvatarURL: g.Photo,
+		Bio:       g.Gender,
+		Blog:      g.PhoneNumber,
+		Email:     g.Email,
+		// 存储 电商nickname
+		Remark:            g.Nickname,
+		EventsURL:         g.Description,
 		Followers:         1,
 		Following:         1,
-		GistsURL:          "g.GistsURL",
+		GistsURL:          g.ThirdPartyEmail,
 		HtmlURL:           "g.HtmlURL",
 		MemberRole:        "g.MemberRole",
 		OrganizationsURL:  "g.OrganizationsURL",
@@ -603,7 +605,7 @@ func (g *MallUser) toModel() *gitUserInfoModel {
 		Weibo:             "g.Weibo",
 		Watched:           0,
 		GiteeCreatedAt:    g.CreateTime,
-		GiteeUpdatedAt:    "g.UpdatedAt",
+		GiteeUpdatedAt:    g.CreateTime,
 	}
 	m.Id = int64(g.ID)
 

@@ -128,6 +128,7 @@ func (u *User) Route(r *wkhttp.WKHttp) {
 	user := r.Group("/v1/user", u.ctx.AuthMiddleware(r))
 	{
 		user.GET("/sendMsg/welcome", u.sendWelcomeMsgV1)           // 手动发送欢迎消息
+		user.DELETE("/mall/destroy", u.destroyMallAccount)         // 注销用户
 		user.POST("/device_token", u.registerUserDeviceToken)      // 注册用户设备
 		user.DELETE("/device_token", u.unregisterUserDeviceToken)  // 卸载用户设备
 		user.POST("/device_badge", u.registerUserDeviceBadge)      // 上传设备红点数量
@@ -2156,6 +2157,61 @@ func (u *User) destroyAccount(c *wkhttp.Context) {
 	err = u.smsServie.Verify(c.Context, userInfo.Zone, userInfo.Phone, code, commonapi.CodeTypeDestroyAccount)
 	if err != nil {
 		c.ResponseError(err)
+		return
+	}
+	t := time.Now()
+	time := fmt.Sprintf("%d%d%d%d%d", t.Year(), t.Month(), t.Day(), t.Minute(), t.Second())
+	phone := fmt.Sprintf("%s@%s@delete", userInfo.Phone, time)
+	username := fmt.Sprintf("%s%s", userInfo.Zone, phone)
+	err = u.db.destroyAccount(loginUID, username, phone)
+	if err != nil {
+		u.Error("注销账号错误", zap.Error(err))
+		c.ResponseError(errors.New("注销账号错误"))
+		return
+	}
+	err = u.ctx.QuitUserDevice(c.GetLoginUID(), -1) // 退出全部登陆设备
+	if err != nil {
+		u.Error("退出登陆设备失败", zap.Error(err))
+		c.ResponseError(errors.New("退出登陆设备失败"))
+		return
+	}
+
+	c.ResponseOK()
+}
+
+// 电商用户注销
+func (u *User) destroyMallAccount(c *wkhttp.Context) {
+	loginUID := c.Param("uid")
+	if loginUID == "" {
+		c.ResponseError(errors.New("IM用户uid不能为空"))
+		return
+	}
+	userInfo, err := u.db.QueryByUID(loginUID)
+	if err != nil {
+		u.Error("查询登录用户信息错误", zap.Error(err))
+		c.ResponseError(errors.New("查询登录用户信息错误"))
+		return
+	}
+	if userInfo == nil || userInfo.IsDestroy == 1 {
+		c.ResponseError(errors.New("登录用户不存在"))
+		return
+	}
+	code := c.Query("token")
+	env := c.Query("env")
+	if len(code) == 0 {
+		c.ResponseError(errors.New("电商token不能为空"))
+		return
+	}
+	// 校验验证码
+	mallUserInfo, err := u.requestMallAccessToken(code, env)
+	if err != nil {
+		c.ResponseError(err)
+		return
+	}
+	// 校验用户id是否一致
+	if mallUserInfo.UserID != userInfo.GiteeUID {
+		u.Error("越权注销用户错误", zap.Error(err))
+		c.ResponseError(errors.New("越权注销用户错误"))
 		return
 	}
 	t := time.Now()
