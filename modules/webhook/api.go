@@ -650,7 +650,15 @@ func (w *Webhook) pushToEchoooApi(uid string, msgResp msgOfflineNotify) {
 	if err == nil {
 		giteeUid := user.GiteeUid
 		if giteeUid != "" {
-			w.echoooPush.Push(giteeUid)
+			contentType := msgResp.ContentType
+			payload := string(msgResp.Payload)
+			log.Info("msgOfflineNotify", zap.Int("contentType", contentType), zap.String("payload", payload))
+			content := ""
+			if msgResp.ContentType == 1 && msgResp.PayloadMap != nil && msgResp.PayloadMap["type"] == 1 && msgResp.PayloadMap["content"] != nil {
+				content = fmt.Sprintf("%v", msgResp.PayloadMap["content"])
+			}
+			log.Info("msgOfflineNotify", zap.Any("msgResp", msgResp))
+			w.echoooPush.Push(giteeUid, content)
 		}
 	} else {
 		log.Info("w.userService.GetUser error")

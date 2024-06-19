@@ -33,7 +33,7 @@ func NewEchoooPush(serverAddresses string, ctx *config.Context) *EchoooPush {
 }
 
 // Push 推送
-func (m *EchoooPush) Push(uid string) error {
+func (m *EchoooPush) Push(uid string, content string) error {
 	log.Info("EchoooPush serverAddresses", zap.String("serverAddresses", m.serverAddresses))
 
 	key := fmt.Sprintf("%s%s", ECHOOO_PUSH_UID, uid)
@@ -50,12 +50,16 @@ func (m *EchoooPush) Push(uid string) error {
 
 	if len(m.serverAddresses) > 0 {
 		servers := strings.Split(m.serverAddresses, ",")
+
 		for _, server := range servers {
 			m.Info("echooo inner Push server", zap.String("server", server), zap.String("uid", uid))
+			params := make(map[string]interface{})
+			params["im_content"] = content
 			reqParam := SendSinglePushReq{
 				UserId:     uid,
 				PushType:   3,
 				TemplateId: 27,
+				Params:     params,
 			}
 			jsonData, _ := json.Marshal(&reqParam)
 			resp, err := http.Post("http://"+server+"/inner/push/sendNotice", "application/json", bytes.NewBuffer(jsonData))
