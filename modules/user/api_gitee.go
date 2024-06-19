@@ -526,7 +526,7 @@ type MallUser struct {
 	UserID          string  `json:"userId"`
 	Nickname        string  `json:"nickname"`
 	Description     string  `json:"description"`
-	Gender          string  `json:"gender"`
+	Gender          int     `json:"gender"`
 	Birthday        *string `json:"birthday"`
 	Photo           string  `json:"photo"`
 	PhoneNumber     string  `json:"phoneNumber"`
@@ -582,7 +582,7 @@ func (g *MallUser) toModel() *gitUserInfoModel {
 		Name:  g.UserID,
 		// 存储电商头像, 电商上传头像时同步更新, 后期从这里获取头像给客服端
 		AvatarURL: g.Photo,
-		Bio:       g.Gender,
+		Bio:       string(rune(g.Gender)),
 		Blog:      g.PhoneNumber,
 		Email:     g.Email,
 		// 存储 电商nickname
