@@ -292,30 +292,33 @@ func (u *User) mallOAuth(c *wkhttp.Context) {
 			name = userInfo.UserID
 		}
 		var model = &createUserModel{
-			UID:      uid,
-			Zone:     "",
-			Phone:    "",
-			Password: "",
-			Name:     name,
-			GiteeUID: userInfo.UserID,
-			Flag:     int(deviceFlag.Uint8()),
+			UID:            uid,
+			Zone:           "",
+			Phone:          "",
+			Password:       "",
+			Name:           name,
+			GiteeUID:       userInfo.UserID,
+			Flag:           int(deviceFlag.Uint8()),
+			IsUploadAvatar: 0,
 		}
-		if userInfo.Photo != "" && !strings.HasSuffix(userInfo.Photo, "no_portrait.png") {
-			timeoutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-			imgReader, _ := u.fileService.DownloadImage(userInfo.Photo, timeoutCtx)
-			cancel()
-			if imgReader != nil {
-				avatarID := crc32.ChecksumIEEE([]byte(uid)) % uint32(u.ctx.GetConfig().Avatar.Partition)
-				_, err = u.fileService.UploadFile(fmt.Sprintf("avatar/%d/%s.png", avatarID, uid), "image/png", func(w io.Writer) error {
-					_, err := io.Copy(w, imgReader)
-					return err
-				})
-				defer imgReader.Close()
-				if err == nil {
-					model.IsUploadAvatar = 1
-				}
-			}
-		}
+
+		// 取消下载用户头像
+		//if userInfo.Photo != "" && !strings.HasSuffix(userInfo.Photo, "no_portrait.png") {
+		//	timeoutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		//	imgReader, _ := u.fileService.DownloadImage(userInfo.Photo, timeoutCtx)
+		//	cancel()
+		//	if imgReader != nil {
+		//		avatarID := crc32.ChecksumIEEE([]byte(uid)) % uint32(u.ctx.GetConfig().Avatar.Partition)
+		//		_, err = u.fileService.UploadFile(fmt.Sprintf("avatar/%d/%s.png", avatarID, uid), "image/png", func(w io.Writer) error {
+		//			_, err := io.Copy(w, imgReader)
+		//			return err
+		//		})
+		//		defer imgReader.Close()
+		//		if err == nil {
+		//			model.IsUploadAvatar = 1
+		//		}
+		//	}
+		//}
 		tx, err := u.ctx.DB().Begin()
 		defer func() {
 			if err := recover(); err != nil {
