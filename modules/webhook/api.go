@@ -662,6 +662,8 @@ func (w *Webhook) pushToEchoooApi(uid string, msgResp msgOfflineNotify) {
 				return
 			}
 			content = result["content"].(string)
+			runes := []rune(content)
+			content = string(runes[:150])
 			if len(content) > 150 {
 				content = content[:150]
 			}
