@@ -34,7 +34,7 @@ func NewEchoooPush(serverAddresses string, ctx *config.Context) *EchoooPush {
 
 // Push 推送
 func (m *EchoooPush) Push(uid string, content string) error {
-	m.Info("EchoooPush serverAddresses", zap.String("serverAddresses", m.serverAddresses))
+	log.Info("EchoooPush serverAddresses", zap.String("serverAddresses", m.serverAddresses), zap.String("im_content", content))
 
 	key := fmt.Sprintf("%s%s", ECHOOO_PUSH_UID, uid)
 	result, err := m.ctx.GetRedisConn().GetString(key)
@@ -47,7 +47,6 @@ func (m *EchoooPush) Push(uid string, content string) error {
 		m.Info("uid " + uid + " has push in five minutes. ")
 		return nil
 	}
-	m.Info("")
 
 	if len(m.serverAddresses) > 0 {
 		servers := strings.Split(m.serverAddresses, ",")
