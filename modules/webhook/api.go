@@ -662,9 +662,11 @@ func (w *Webhook) pushToEchoooApi(uid string, msgResp msgOfflineNotify) {
 				return
 			}
 			content = result["content"].(string)
+			if len(content) > 150 {
+				content = content[:150]
+			}
 
-			log.Info("msgOfflineNotify", zap.Any("msgResp", msgResp))
-			log.Info("msgOfflineNotify", zap.String("im_content", content))
+			log.Info("msgOfflineNotify", zap.Any("msgResp", msgResp), zap.String("im_content", content))
 			w.echoooPush.Push(giteeUid, content)
 		}
 	} else {
