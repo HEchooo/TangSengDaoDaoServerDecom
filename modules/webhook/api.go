@@ -650,7 +650,26 @@ func (w *Webhook) pushToEchoooApi(uid string, msgResp msgOfflineNotify) {
 	if err == nil {
 		giteeUid := user.GiteeUid
 		if giteeUid != "" {
-			w.echoooPush.Push(giteeUid)
+			contentType := msgResp.ContentType
+			payload := string(msgResp.Payload)
+			log.Info("msgOfflineNotify", zap.Int("contentType", contentType), zap.String("payload", payload))
+			content := "请点击查看"
+			var result map[string]interface{}
+			// 将 JSON 字符串反序列化为 map
+			err := json.Unmarshal([]byte(payload), &result)
+			if err != nil {
+				log.Error("Error unmarshalling JSON: %v", zap.Error(err))
+				return
+			}
+			content = result["content"].(string)
+			runes := []rune(content)
+			content = string(runes[:150])
+			if len(content) > 150 {
+				content = content[:150]
+			}
+
+			log.Info("msgOfflineNotify", zap.Any("msgResp", msgResp), zap.String("im_content", content))
+			w.echoooPush.Push(giteeUid, content)
 		}
 	} else {
 		log.Info("w.userService.GetUser error")
