@@ -430,7 +430,7 @@ func (u *User) requestMallAccessToken(code string, env string) (*MallUser, error
 	var url string = "https://mall-api.valleysound.xyz/user-service/user/get"
 	if env == "dev" {
 		url = "https://mall-api.valleysound.xyz/user-service/user/get"
-	} else if env == "prd" {
+	} else if env == "prod" {
 		url = "https://api.alvinclub.ca/user-service/user/get"
 	} else if env == "stage" {
 		url = "https://stage-api.alvinclub.ca/user-service/user/get"
