@@ -48,7 +48,8 @@ func (m *managerDB) queryUserListWithPage(pageSize, page uint64, onelineStatus i
 // onelineStatus 在线状态 -1 为所有 0. 离线 1. 在线
 func (m *managerDB) queryUserListWithPageAndKeyword(keyword string, onelineStatus int, pageSize, page uint64) ([]*managerUserModel, error) {
 	var users []*managerUserModel
-	selectStm := m.session.Select("user.uid,user.name,user.username,user.status,user.phone,user.short_no,user.sex,user.is_destroy,user.created_at,user.gitee_uid,user.github_uid,user.wx_openid,max(user_online.online) online").From("user").LeftJoin("user_online", "user.uid=user_online.uid").Where("user.name like ? or user.uid like ? or user.phone like ? or user.short_no like ?", "%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%")
+	// 增加查询用户电商昵称邮箱手机第三方邮箱
+	selectStm := m.session.Select("user.uid,user.name,user.username,user.status,user.phone,user.short_no,user.sex,user.is_destroy,user.created_at,user.gitee_uid,user.github_uid,user.wx_openid,max(user_online.online) online").From("user").LeftJoin("user_online", "user.uid=user_online.uid").LeftJoin("gitee_user", "user.gitee_uid=gitee_user.login").Where("user.name like ? or user.uid like ? or user.phone like ? or user.short_no like ? or gitee_user.blog like ? or gitee_user.email like ? or gitee_user.remark like ? or gitee_user.gists_url like ?", "%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%")
 	if onelineStatus != -1 {
 		selectStm = selectStm.Where("user_online.online=?", onelineStatus)
 	}

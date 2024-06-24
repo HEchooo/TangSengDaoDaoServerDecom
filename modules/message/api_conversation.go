@@ -88,6 +88,8 @@ func (co *Conversation) Route(r *wkhttp.WKHttp) {
 
 	conversation := r.Group("/v1/conversation", co.ctx.AuthMiddleware(r))
 	{
+		// 查询用户是否有未读消息
+		conversation.GET("/haveUnRead", co.getUserUnreadConversation)
 		// 离线的最近会话
 		conversation.POST("/sync", co.syncUserConversation)
 		conversation.POST("/syncack", co.syncUserConversationAck)
@@ -211,6 +213,50 @@ func (co *Conversation) deleteConversation(c *wkhttp.Context) {
 		return
 	}
 	c.ResponseOK()
+}
+
+// 查询用户是否有未读消息
+func (co *Conversation) getUserUnreadConversation(c *wkhttp.Context) {
+	var req struct {
+		LoginUID    string `json:"uid"`           // uid
+		Version     int64  `json:"version"`       // 当前客户端的会话最大版本号(客户端最新会话的时间戳)
+		LastMsgSeqs string `json:"last_msg_seqs"` // 客户端所有会话的最后一条消息序列号 格式： channelID:channelType:last_msg_seq|channelID:channelType:last_msg_seq
+		MsgCount    int64  `json:"msg_count"`     // 每个会话消息数量
+		DeviceUUID  string `json:"device_uuid"`   // 设备uuid
+	}
+	version := req.Version
+	loginUID := req.LoginUID
+	lastMsgSeqs := req.LastMsgSeqs
+	largeChannels := make([]*config.Channel, 0)
+	//if len(largeGroupInfos) > 0 {
+	//	for _, largeGroupInfo := range largeGroupInfos {
+	//		largeChannels = append(largeChannels, &config.Channel{
+	//			ChannelID:   largeGroupInfo.GroupNo,
+	//			ChannelType: common.ChannelTypeGroup.Uint8(),
+	//		})
+	//	}
+	//}
+
+	conversations, err := co.ctx.IMSyncUserConversation(loginUID, version, req.MsgCount, lastMsgSeqs, largeChannels)
+	if err != nil {
+		co.Error("会话管理-同步离线后的最近会话失败！", zap.Error(err), zap.String("loginUID", loginUID))
+		c.ResponseError(errors.New("会话管理-同步离线后的最近会话失败！"))
+		return
+	}
+
+	if len(conversations) > 0 {
+		for _, conversation := range conversations {
+			if conversation.Unread > 0 {
+				c.JSON(http.StatusOK, gin.H{
+					"hasUnread": true,
+				})
+			}
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"hasUnread": false,
+	})
 }
 
 // 获取离线的最近会话
