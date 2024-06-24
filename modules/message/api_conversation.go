@@ -86,10 +86,16 @@ func (co *Conversation) Route(r *wkhttp.WKHttp) {
 
 	}
 
-	conversation := r.Group("/v1/conversation", co.ctx.AuthMiddleware(r))
+	// mall调用不需要登录
+	mallConversation := r.Group("/v1/mall")
 	{
 		// 查询用户是否有未读消息
-		conversation.GET("/haveUnRead", co.getUserUnreadConversation)
+		mallConversation.GET("/conversation/haveUnRead", co.getUserUnreadConversation)
+	}
+
+	conversation := r.Group("/v1/conversation", co.ctx.AuthMiddleware(r))
+	{
+
 		// 离线的最近会话
 		conversation.POST("/sync", co.syncUserConversation)
 		conversation.POST("/syncack", co.syncUserConversationAck)
