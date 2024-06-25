@@ -386,6 +386,9 @@ func (s *Service) GetUserDetails(uids []string, loginUID string) ([]*UserDetailR
 		} else {
 			mallUserName = GenerateString(mallUserInfo)
 		}
+		if mallUserName == "" {
+			mallUserName = userDetail.Name
+		}
 		userDetailResps = append(userDetailResps, NewUserDetailResp(userDetail, nameRemark, loginUID, sourceFrom, online, lastOffline, deviceFlag, follow, status, beDeleted, beBlacklist, setting, vercode, mallUserName))
 	}
 
