@@ -241,11 +241,6 @@ func (s *Service) GetUserDetail(uid string, loginUID string) (*UserDetailResp, e
 
 func (s *Service) GetUserDetails(uids []string, loginUID string) ([]*UserDetailResp, error) {
 
-	mallUserDetails, err2 := s.GetMallUserDetails(uids)
-	if err2 != nil {
-		s.Error("查询电商用户详情失败！", zap.Error(err2))
-	}
-
 	userDetails, err := s.db.QueryDetailByUIDs(uids, loginUID)
 	if err != nil {
 		s.Error("查询用户详情失败！")
@@ -376,7 +371,11 @@ func (s *Service) GetUserDetails(uids []string, loginUID string) ([]*UserDetailR
 		} else {
 			beDeleted = 1
 		}
-		z
+
+		mallUserDetails, err2 := s.GetMallUserDetails(uids)
+		if err2 != nil {
+			s.Error("查询电商用户详情失败！", zap.Error(err2))
+		}
 		mallUserName := ""
 		//mallUserInfo := mallUserDetails[uid]
 		// 获取特定UID的用户信息并生成字符串
