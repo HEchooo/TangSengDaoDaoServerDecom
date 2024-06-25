@@ -236,6 +236,9 @@ func (s *Service) GetUserDetail(uid string, loginUID string) (*UserDetailResp, e
 	} else {
 		mallUserName = GenerateString(mallUserInfo)
 	}
+	if mallUserName == "" {
+		mallUserName = model.Name
+	}
 	return NewUserDetailResp(model, remark, loginUID, sourceFrom, online, lastOffline, deviceFlag, follow, blacklist, beDeleted, beBlacklist, userSetting, vercode, mallUserName), nil
 }
 
