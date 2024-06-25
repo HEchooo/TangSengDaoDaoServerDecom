@@ -61,6 +61,7 @@ func (m *Service) GetMallUserDetails(uids []string) (map[string]UserInfo, error)
 	//for _, server := range servers {
 	//m.Info("echooo inner Push server", zap.String("server", server), zap.String("uid", uid))
 	//baseURL := "http://" + server + "/user/inner/im/batchGet"
+	// todo 这里后面改成从nacos获取地址
 	baseURL := "http://10.10.10.10:8004/user/inner/im/batchGet"
 
 	uidParam := strings.Join(uids, ",")
