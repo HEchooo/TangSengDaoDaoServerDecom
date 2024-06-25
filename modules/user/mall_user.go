@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"go.uber.org/zap"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -63,10 +64,22 @@ func (m *Service) GetMallUserDetails(uids []string) (map[string]UserInfo, error)
 	baseURL := "http://10.10.10.10:8004/user/inner/im/batchGet"
 
 	uidParam := strings.Join(uids, ",")
+	// 构建请求 URL
 	reqURL := fmt.Sprintf("%s?uids=%s", baseURL, url.QueryEscape(uidParam))
 
-	// 发送HTTP请求
-	resp, err := http.Get(reqURL)
+	// 创建一个新的 HTTP 请求
+	req, err := http.NewRequest("GET", reqURL, nil)
+	if err != nil {
+		log.Fatalf("Failed to create request: %v", err)
+	}
+	// 设置头信息
+	req.Header.Set("Connection", "Keep-Alive")
+	req.Header.Set("User-Agent", "Apache-HttpClient/4.5.14 (Java/17.0.7)")
+	req.Header.Set("Accept-Encoding", "br,deflate,gzip,x-gzip")
+
+	// 创建一个 HTTP 客户端并发送请求
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("请求失败: %v", err)
 	}

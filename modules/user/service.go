@@ -376,7 +376,7 @@ func (s *Service) GetUserDetails(uids []string, loginUID string) ([]*UserDetailR
 		} else {
 			beDeleted = 1
 		}
-
+		z
 		mallUserName := ""
 		//mallUserInfo := mallUserDetails[uid]
 		// 获取特定UID的用户信息并生成字符串
