@@ -55,68 +55,64 @@ type APIResponse struct {
 
 // GetMallUserDetails 发送HTTP请求并获取用户详情
 func (m *Service) GetMallUserDetails(uids []string) (map[string]UserInfo, error) {
-	//if len(m.serverAddresses) > 0 {
-	//	servers := strings.Split(m.serverAddresses, ",")
-
-	//for _, server := range servers {
-	//m.Info("echooo inner Push server", zap.String("server", server), zap.String("uid", uid))
-	//baseURL := "http://" + server + "/user/inner/im/batchGet"
-	// todo 这里后面改成从nacos获取地址
-	baseURL := "http://10.10.10.10:8004/user/inner/im/batchGet"
-
-	uidParam := strings.Join(uids, ",")
-	// 构建请求 URL
-	reqURL := fmt.Sprintf("%s?uids=%s", baseURL, url.QueryEscape(uidParam))
-	fmt.Errorf("请求体打印: %v", reqURL)
-
-	// 创建一个新的 HTTP 请求
-	req, err := http.NewRequest("GET", reqURL, nil)
-	if err != nil {
-		log.Fatalf("Failed to create request: %v", err)
-	}
-	// 设置头信息
-	//req.Header.Set("Connection", "Keep-Alive")
-	//req.Header.Set("User-Agent", "Apache-HttpClient/4.5.14 (Java/17.0.7)")
-	//req.Header.Set("Accept-Encoding", "br,deflate,gzip,x-gzip")
-	req.Header.Set("Accept", "application/json")
-
-	// 创建一个 HTTP 客户端并发送请求
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("请求失败: %v", err)
-	}
-	defer resp.Body.Close()
-
-	// 解析响应
-	var apiResp APIResponse
-	if err := json.NewDecoder(resp.Body).Decode(&apiResp); err != nil {
-		return nil, fmt.Errorf("解析响应失败: %v", err)
-	}
-
-	// 检查响应码
-	if apiResp.Code != 0 {
-		return nil, fmt.Errorf("API请求失败: %s", apiResp.Message)
-	}
-
-	// 构造结果map
 	resultMap := make(map[string]UserInfo)
-	for _, userInfo := range apiResp.Data {
-		resultMap[userInfo.ImUid] = userInfo
-	}
-	if err != nil {
-		m.Info("Error reading response body:", zap.Error(err))
-		//continue
-	} else {
-		return resultMap, nil
-		//break
-	}
-	//}
-	//}
-	//baseURL := "http://3.216.154.243:8004/user/inner/im/batchGet"
-	//baseURL := "http://127.0.0.1:8004/user-service/user/inner/im/batchGet"
-	return nil, nil
+	if len(m.serverAddresses) > 0 {
+		servers := strings.Split(m.serverAddresses, ",")
 
+		for _, server := range servers {
+			// todo 这里后面改成从nacos获取地址
+			baseURL := "http://" + server + "/user/inner/im/batchGet"
+			//baseURL := "http://10.10.10.10:8004/user/inner/im/batchGet"
+
+			uidParam := strings.Join(uids, ",")
+			// 构建请求 URL
+			reqURL := fmt.Sprintf("%s?uids=%s", baseURL, url.QueryEscape(uidParam))
+			fmt.Errorf("请求体打印: %v", reqURL)
+
+			// 创建一个新的 HTTP 请求
+			req, err := http.NewRequest("GET", reqURL, nil)
+			if err != nil {
+				log.Fatalf("Failed to create request: %v", err)
+			}
+			// 设置头信息
+			//req.Header.Set("Connection", "Keep-Alive")
+			//req.Header.Set("User-Agent", "Apache-HttpClient/4.5.14 (Java/17.0.7)")
+			//req.Header.Set("Accept-Encoding", "br,deflate,gzip,x-gzip")
+			req.Header.Set("Accept", "application/json")
+
+			// 创建一个 HTTP 客户端并发送请求
+			client := &http.Client{}
+			resp, err := client.Do(req)
+			if err != nil {
+				return nil, fmt.Errorf("请求失败: %v", err)
+			}
+			defer resp.Body.Close()
+
+			// 解析响应
+			var apiResp APIResponse
+			if err := json.NewDecoder(resp.Body).Decode(&apiResp); err != nil {
+				return nil, fmt.Errorf("解析响应失败: %v", err)
+			}
+
+			// 检查响应码
+			if apiResp.Code != 0 {
+				return nil, fmt.Errorf("API请求失败: %s", apiResp.Message)
+			}
+
+			// 构造结果map
+			resultMap = make(map[string]UserInfo)
+			for _, userInfo := range apiResp.Data {
+				resultMap[userInfo.ImUid] = userInfo
+			}
+			if err != nil {
+				m.Info("Error reading response body:", zap.Error(err))
+				continue
+			} else {
+				break
+			}
+		}
+	}
+	return resultMap, nil
 }
 
 func GetMallUserDetailsTest(uids []string) (map[string]UserInfo, error) {
