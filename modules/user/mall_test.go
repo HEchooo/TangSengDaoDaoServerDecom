@@ -6,13 +6,13 @@ import (
 )
 
 // GetUserDetailsHandler 处理获取用户详情的请求
-func (s *Service) TestGetUserDetailsHandler(t *testing.T) {
+func TestGetUserDetailsHandler(t *testing.T) {
 	//url := "http://3.216.154.243:8004/user/inner/im/batchGet"
 	// 测试数据
 	uids := []string{"a49f8c9b4a4b4465aaec417e0dc69ac1", "0c8cde3d959b41ecad0ba62429d6b42e"}
 
 	// 获取用户详情
-	userDetails, err := s.GetMallUserDetails(uids)
+	userDetails, err := GetMallUserDetailsTest(uids)
 	if err != nil {
 		fmt.Printf("获取用户详情失败: %v\n", err)
 		return
