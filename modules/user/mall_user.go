@@ -16,7 +16,13 @@ type UserInfo struct {
 	UserID          string `json:"userId"`
 	Nickname        string `json:"nickname"`
 	Description     string `json:"description"`
-	Gender          string `json:"gender"`
+	Gender          int    `json:"gender"`
+	Password        string `json:"password"`
+	ImUsername      string `json:"imUsername"`
+	ImPassword      string `json:"imPassword"`
+	ImUid           string `json:"imUid"`
+	GmtCreate       string `json:"gmtCreate"`
+	GmtUpdate       string `json:"gmtUpdate"`
 	Birthday        string `json:"birthday"`
 	Photo           string `json:"photo"`
 	PhoneNumber     string `json:"phoneNumber"`
@@ -26,16 +32,10 @@ type UserInfo struct {
 	Platform        string `json:"platform"`
 	GoogleUsername  string `json:"googleUsername"`
 	AppleUsername   string `json:"appleUsername"`
-	Password        string `json:"password"`
-	ImUsername      string `json:"imUsername"`
-	ImPassword      string `json:"imPassword"`
-	ImUid           string `json:"imUid"`
 	CreateTime      string `json:"createTime"`
 	UserType        int    `json:"userType"`
 	Deleted         int    `json:"deleted"`
 	Status          int    `json:"status"`
-	GmtCreate       string `json:"gmtCreate"`
-	GmtUpdate       string `json:"gmtUpdate"`
 }
 
 // MallAPIResponse 定义API响应结构体
@@ -66,7 +66,7 @@ func (m *Service) GetMallUserDetails(uids []string) (map[string]UserInfo, error)
 	uidParam := strings.Join(uids, ",")
 	// 构建请求 URL
 	reqURL := fmt.Sprintf("%s?uids=%s", baseURL, url.QueryEscape(uidParam))
-	log.Println("Failed to create request:  " + reqURL)
+	fmt.Errorf("请求体打印: %v", reqURL)
 
 	// 创建一个新的 HTTP 请求
 	req, err := http.NewRequest("GET", reqURL, nil)
