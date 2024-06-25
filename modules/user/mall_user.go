@@ -60,7 +60,7 @@ func (m *Service) GetMallUserDetails(uids []string) (map[string]UserInfo, error)
 	//for _, server := range servers {
 	//m.Info("echooo inner Push server", zap.String("server", server), zap.String("uid", uid))
 	//baseURL := "http://" + server + "/user/inner/im/batchGet"
-	baseURL := "http://127.0.0.1:8004/user/inner/im/batchGet"
+	baseURL := "http://10.10.10.10:8004/user/inner/im/batchGet"
 
 	uidParam := strings.Join(uids, ",")
 	reqURL := fmt.Sprintf("%s?uids=%s", baseURL, url.QueryEscape(uidParam))

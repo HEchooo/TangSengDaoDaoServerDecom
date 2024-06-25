@@ -223,7 +223,20 @@ func (s *Service) GetUserDetail(uid string, loginUID string) (*UserDetailResp, e
 	if toUserSetting != nil {
 		beBlacklist = toUserSetting.Blacklist
 	}
-	return NewUserDetailResp(model, remark, loginUID, sourceFrom, online, lastOffline, deviceFlag, follow, blacklist, beDeleted, beBlacklist, userSetting, vercode, "", ""), nil
+	uids := []string{uid}
+	mallUserDetails, err2 := s.GetMallUserDetails(uids)
+	if err2 != nil {
+		s.Error("查询电商用户详情失败！", zap.Error(err2))
+	}
+	// 获取特定UID的用户信息并生成字符串
+	mallUserName := ""
+	mallUserInfo, exists := mallUserDetails[uid]
+	if !exists {
+		fmt.Printf("UID为 %s 的电商用户不存在\n", uid)
+	} else {
+		mallUserName = GenerateString(mallUserInfo)
+	}
+	return NewUserDetailResp(model, remark, loginUID, sourceFrom, online, lastOffline, deviceFlag, follow, blacklist, beDeleted, beBlacklist, userSetting, vercode, mallUserName), nil
 }
 
 func (s *Service) GetUserDetails(uids []string, loginUID string) ([]*UserDetailResp, error) {
@@ -373,7 +386,7 @@ func (s *Service) GetUserDetails(uids []string, loginUID string) ([]*UserDetailR
 		} else {
 			mallUserName = GenerateString(mallUserInfo)
 		}
-		userDetailResps = append(userDetailResps, NewUserDetailResp(userDetail, nameRemark, loginUID, sourceFrom, online, lastOffline, deviceFlag, follow, status, beDeleted, beBlacklist, setting, vercode, mallUserName, mallUserName))
+		userDetailResps = append(userDetailResps, NewUserDetailResp(userDetail, nameRemark, loginUID, sourceFrom, online, lastOffline, deviceFlag, follow, status, beDeleted, beBlacklist, setting, vercode, mallUserName))
 	}
 
 	return userDetailResps, nil
@@ -936,7 +949,7 @@ type UserDetailResp struct {
 	FlameSecond    int               `json:"flame_second"`     // 阅后即焚秒数
 }
 
-func NewUserDetailResp(m *Detail, remark, loginUID, sourceFrom string, onLine, lastOffline int, deviceFlag config.DeviceFlag, follow, status, beDeleted, beBlacklist int, setting *SettingModel, vercode, name, userName string) *UserDetailResp {
+func NewUserDetailResp(m *Detail, remark, loginUID, sourceFrom string, onLine, lastOffline int, deviceFlag config.DeviceFlag, follow, status, beDeleted, beBlacklist int, setting *SettingModel, vercode, userName string) *UserDetailResp {
 	self := loginUID == m.UID
 
 	email := ""
