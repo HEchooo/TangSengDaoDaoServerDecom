@@ -6,6 +6,7 @@ import (
 	"go.uber.org/zap"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 // UserInfo 定义返回的用户信息结构体
@@ -59,13 +60,10 @@ func (m *Service) GetMallUserDetails(uids []string) (map[string]UserInfo, error)
 	//for _, server := range servers {
 	//m.Info("echooo inner Push server", zap.String("server", server), zap.String("uid", uid))
 	//baseURL := "http://" + server + "/user/inner/im/batchGet"
-	baseURL := "http://3.216.154.243:8004/user/inner/im/batchGet"
+	baseURL := "http://127.0.0.1:8004/user/inner/im/batchGet"
 
-	params := url.Values{}
-	for _, uid := range uids {
-		params.Add("uids", uid)
-	}
-	reqURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
+	uidParam := strings.Join(uids, ",")
+	reqURL := fmt.Sprintf("%s?uids=%s", baseURL, url.QueryEscape(uidParam))
 
 	// 发送HTTP请求
 	resp, err := http.Get(reqURL)
