@@ -55,8 +55,8 @@ type APIResponse struct {
 
 // GetMallUserDetails 发送HTTP请求并获取用户详情
 func (m *Service) GetMallUserDetails(uids []string) (map[string]UserInfo, error) {
-	if len(m.serverAddresses) > 0 {
-		servers := strings.Split(m.serverAddresses, ",")
+	if len(m.ctx.GetConfig().EchoooPush.ServerAddresses) > 0 {
+		servers := strings.Split(m.ctx.GetConfig().EchoooPush.ServerAddresses, ",")
 
 		for _, server := range servers {
 			// todo 这里后面改成从nacos获取地址

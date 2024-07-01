@@ -82,9 +82,9 @@ type IService interface {
 
 // Service Service
 type Service struct {
-	serverAddresses string
-	ctx             *config.Context
-	db              *DB
+	mallConfig *config.EchoooPush
+	ctx        *config.Context
+	db         *DB
 	log.Log
 	friendDB         *friendDB
 	onlineDB         *onlineDB
