@@ -62,11 +62,11 @@ func (m *Service) GetMallUserDetails(uids []string) (map[string]UserInfo, error)
 			// todo 这里后面改成从nacos获取地址
 			parts := strings.Split(server, ":")
 			if len(parts) != 2 {
-				m.Info("获取用户服务请求地址错误,server:" + server)
+				m.Error("获取用户服务请求地址错误,server:" + server)
 			}
 
 			serverIp := parts[0]
-			baseURL := "http://" + serverIp + "/user/inner/im/batchGet"
+			baseURL := "http://" + serverIp + ":8004/user/inner/im/batchGet"
 			//baseURL := "http://10.10.10.10:8004/user/inner/im/batchGet"
 
 			uidParam := strings.Join(uids, ",")
