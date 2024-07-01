@@ -387,6 +387,8 @@ func (s *Service) GetUserDetails(uids []string, loginUID string) ([]*UserDetailR
 			fmt.Printf("UID为 %s 的电商用户不存在\n", uid)
 		} else {
 			mallUserName = GenerateString(mallUserInfo)
+			// 同步电商注销状态
+			userDetail.IsDestroy = mallUserInfo.Deleted
 		}
 		if mallUserName == "" {
 			mallUserName = userDetail.Name
