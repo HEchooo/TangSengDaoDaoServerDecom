@@ -393,7 +393,6 @@ func (co *Conversation) syncUserConversation(c *wkhttp.Context) {
 		"854cad7fe11344b3aff939969da025a4": true,
 		"1d5e315ea3e447e6b7d0a886ac8c9910": true,
 		"811be418330f4febabe9e2318779f7bb": true,
-		"63dc69dd30c446e88ef388f7c47413eb": true,
 	}
 
 	groupNos := make([]string, 0, len(conversations))
