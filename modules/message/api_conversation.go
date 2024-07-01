@@ -408,8 +408,9 @@ func (co *Conversation) syncUserConversation(c *wkhttp.Context) {
 				// 过滤测试用户
 				if excludeUIDs[conversation.ChannelID] {
 					continue
+				} else {
+					uids = append(uids, conversation.ChannelID)
 				}
-				uids = append(uids, conversation.ChannelID)
 			} else {
 				groupNos = append(groupNos, conversation.ChannelID)
 			}
@@ -458,6 +459,10 @@ func (co *Conversation) syncUserConversation(c *wkhttp.Context) {
 		}
 		if len(users) > 0 {
 			for _, user := range users {
+				// 用户屏蔽特定用户
+				if excludeUIDs[user.UID] {
+					continue
+				}
 				userMap[user.UID] = user
 			}
 		}
@@ -554,6 +559,10 @@ func (co *Conversation) syncUserConversation(c *wkhttp.Context) {
 			extra := conversationExtraMap[channelKey]
 			syncUserConversationResp := newSyncUserConversationResp(conversation, extra, loginUID, co.messageExtraDB, co.messageReactionDB, co.messageUserExtraDB, mute, stick, channelOffsetM, deviceOffsetM, channelOffsetMessageSeq)
 			if len(syncUserConversationResp.Recents) > 0 {
+				// 对话屏特定用户
+				if excludeUIDs[syncUserConversationResp.ChannelID] {
+					continue
+				}
 				syncUserConversationResps = append(syncUserConversationResps, syncUserConversationResp)
 			}
 			// if channelSetting != nil {

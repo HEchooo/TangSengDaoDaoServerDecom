@@ -1678,12 +1678,12 @@ func newSyncChannelMessageResp(resp *config.SyncChannelMessageResp, loginUID str
 		}
 
 		// 要排除的UID列表
-		excludeUIDs := map[string]bool{
-			"854cad7fe11344b3aff939969da025a4": true,
-			"1d5e315ea3e447e6b7d0a886ac8c9910": true,
-			"811be418330f4febabe9e2318779f7bb": true,
-			"63dc69dd30c446e88ef388f7c47413eb": true,
-		}
+		//excludeUIDs := map[string]bool{
+		//	"854cad7fe11344b3aff939969da025a4": true,
+		//	"1d5e315ea3e447e6b7d0a886ac8c9910": true,
+		//	"811be418330f4febabe9e2318779f7bb": true,
+		//	"63dc69dd30c446e88ef388f7c47413eb": true,
+		//}
 
 		// 设备偏移
 		deviceLastMessageSeq, err := deviceOffsetDB.queryMessageSeq(loginUID, deviceUUID, channelID, channelType)
@@ -1697,9 +1697,9 @@ func newSyncChannelMessageResp(resp *config.SyncChannelMessageResp, loginUID str
 			if message.MessageSeq <= uint32(deviceLastMessageSeq) {
 				continue
 			}
-			if excludeUIDs[message.FromUID] {
-				continue
-			}
+			//if excludeUIDs[message.FromUID] {
+			//	continue
+			//}
 			messageIDStr := strconv.FormatInt(message.MessageID, 10)
 			messageExtra := messageExtraMap[messageIDStr]
 			messageUserExtra := messageUserExtraMap[messageIDStr]
