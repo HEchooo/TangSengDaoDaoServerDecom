@@ -388,6 +388,14 @@ func (co *Conversation) syncUserConversation(c *wkhttp.Context) {
 		return
 	}
 
+	// 要排除的UID列表
+	excludeUIDs := map[string]bool{
+		"854cad7fe11344b3aff939969da025a4": true,
+		"1d5e315ea3e447e6b7d0a886ac8c9910": true,
+		"811be418330f4febabe9e2318779f7bb": true,
+		"63dc69dd30c446e88ef388f7c47413eb": true,
+	}
+
 	groupNos := make([]string, 0, len(conversations))
 	uids := make([]string, 0, len(conversations))
 	channelIDs := make([]string, 0, len(conversations))
@@ -397,6 +405,10 @@ func (co *Conversation) syncUserConversation(c *wkhttp.Context) {
 				continue
 			}
 			if conversation.ChannelType == common.ChannelTypePerson.Uint8() {
+				// 过滤测试用户
+				if excludeUIDs[conversation.ChannelID] {
+					continue
+				}
 				uids = append(uids, conversation.ChannelID)
 			} else {
 				groupNos = append(groupNos, conversation.ChannelID)
@@ -436,6 +448,7 @@ func (co *Conversation) syncUserConversation(c *wkhttp.Context) {
 
 	// ---------- 用户设置 ----------
 	users := make([]*user.UserDetailResp, 0)
+
 	if len(uids) > 0 {
 		users, err = co.userService.GetUserDetails(uids, c.GetLoginUID())
 		if err != nil {
