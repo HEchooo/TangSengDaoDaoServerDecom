@@ -416,11 +416,21 @@ func GenerateString(userInfo UserInfo) string {
 
 // MaskPhoneNumber 脱敏电话号码
 func MaskPhoneNumber(phone string) string {
-	if len(phone) < 7 {
-		log.Info("手机号<7位")
+	parts := strings.Split(phone, "+")
+	if len(parts) != 2 {
+		log.Info("手机号格式不正确")
 		return phone
 	}
-	return phone[:3] + "****" + phone[len(phone)-4:]
+
+	areaCode := parts[0]
+	phoneNumber := parts[1]
+
+	if len(phoneNumber) < 7 {
+		log.Info("手机号<7位")
+		return "+" + areaCode + " " + phoneNumber
+	}
+
+	return "+" + areaCode + " " + phoneNumber[:1] + "****" + phoneNumber[len(phoneNumber)-4:]
 }
 
 // MaskEmail 脱敏邮箱地址
