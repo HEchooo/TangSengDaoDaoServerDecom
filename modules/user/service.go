@@ -429,8 +429,11 @@ func MaskPhoneNumber(phone string) string {
 		log.Info("手机号<7位")
 		return "+" + areaCode + " " + phoneNumber
 	}
-
-	return "+" + areaCode + " " + phoneNumber[:1] + "****" + phoneNumber[len(phoneNumber)-4:]
+	if len(areaCode) < 2 {
+		return "+" + areaCode + " " + phoneNumber[:1] + "****" + phoneNumber[len(phoneNumber)-4:]
+	} else {
+		return "+" + areaCode + "" + "****" + phoneNumber[len(phoneNumber)-4:]
+	}
 }
 
 // MaskEmail 脱敏邮箱地址
