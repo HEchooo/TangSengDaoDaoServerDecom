@@ -117,6 +117,8 @@ func (m *Service) GetMallUserDetails(uids []string) (map[string]UserInfo, error)
 				break
 			}
 		}
+	} else {
+		m.Error("获取电商api地址为空")
 	}
 	//baseURL := "http://3.216.154.243:8004/user/inner/im/batchGet"
 	//baseURL := "http://127.0.0.1:8004/user-service/user/inner/im/batchGet"
