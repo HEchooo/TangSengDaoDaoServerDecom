@@ -264,6 +264,7 @@ func (co *Conversation) getUserUnreadConversation(c *wkhttp.Context) {
 				c.JSON(http.StatusOK, gin.H{
 					"hasUnread": true,
 				})
+				return
 			}
 		}
 	}
