@@ -223,17 +223,24 @@ func (co *Conversation) deleteConversation(c *wkhttp.Context) {
 
 // 查询用户是否有未读消息
 func (co *Conversation) getUserUnreadConversation(c *wkhttp.Context) {
-	var req struct {
-		LoginUID    string `json:"uid"`           // uid
-		Version     int64  `json:"version"`       // 当前客户端的会话最大版本号(客户端最新会话的时间戳)
-		LastMsgSeqs string `json:"last_msg_seqs"` // 客户端所有会话的最后一条消息序列号 格式： channelID:channelType:last_msg_seq|channelID:channelType:last_msg_seq
-		MsgCount    int64  `json:"msg_count"`     // 每个会话消息数量
-		DeviceUUID  string `json:"device_uuid"`   // 设备uuid
-	}
-	version := req.Version
-	loginUID := req.LoginUID
-	lastMsgSeqs := req.LastMsgSeqs
+	//var req struct {
+	//	LoginUID    string `json:"uid"`           // uid
+	//	Version     int64  `json:"version"`       // 当前客户端的会话最大版本号(客户端最新会话的时间戳)
+	//	LastMsgSeqs string `json:"last_msg_seqs"` // 客户端所有会话的最后一条消息序列号 格式： channelID:channelType:last_msg_seq|channelID:channelType:last_msg_seq
+	//	MsgCount    int64  `json:"msg_count"`     // 每个会话消息数量
+	//	DeviceUUID  string `json:"device_uuid"`   // 设备uuid
+	//}
+	//version := req.Version
+	//loginUID := req.LoginUID
+	//lastMsgSeqs := req.LastMsgSeqs
 	largeChannels := make([]*config.Channel, 0)
+
+	version, err := strconv.ParseInt(c.Query("version"), 10, 64)
+	loginUID := c.Query("uid")
+	lastMsgSeqs := c.Query("last_msg_seqs")
+	// deviceUUID := c.Query("device_uuid")
+	msgCount, err := strconv.ParseInt(c.Query("msg_count"), 10, 64)
+
 	//if len(largeGroupInfos) > 0 {
 	//	for _, largeGroupInfo := range largeGroupInfos {
 	//		largeChannels = append(largeChannels, &config.Channel{
@@ -243,13 +250,14 @@ func (co *Conversation) getUserUnreadConversation(c *wkhttp.Context) {
 	//	}
 	//}
 
-	conversations, err := co.ctx.IMSyncUserConversation(loginUID, version, req.MsgCount, lastMsgSeqs, largeChannels)
+	conversations, err := co.ctx.IMSyncUserConversation(loginUID, version, msgCount, lastMsgSeqs, largeChannels)
 	if err != nil {
 		co.Error("会话管理-同步离线后的最近会话失败！", zap.Error(err), zap.String("loginUID", loginUID))
 		c.ResponseError(errors.New("会话管理-同步离线后的最近会话失败！"))
 		return
 	}
 
+	co.Info("查询用户离线消息成功,条数" + strconv.Itoa(len(conversations)))
 	if len(conversations) > 0 {
 		for _, conversation := range conversations {
 			if conversation.Unread > 0 {

@@ -69,6 +69,7 @@ func (m *EchoooPush) Push(uid string, content string) error {
 				continue
 			} else {
 				m.ctx.GetRedisConn().SetAndExpire(key, "1", time.Minute*5)
+				m.Info("echooo inner Push success server", zap.String("server", server), zap.String("uid", uid))
 				break
 			}
 
