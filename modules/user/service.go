@@ -390,6 +390,8 @@ func (s *Service) GetUserDetails(uids []string, loginUID string) ([]*UserDetailR
 			mallUserName = GenerateString(mallUserInfo)
 			// 同步电商注销状态
 			userDetail.IsDestroy = mallUserInfo.Deleted
+			// remark 电商用户id
+			nameRemark = mallUserInfo.UserID
 		}
 		if mallUserName == "" {
 			mallUserName = userDetail.Name
