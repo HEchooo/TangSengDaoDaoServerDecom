@@ -235,6 +235,7 @@ func (s *Service) GetUserDetail(uid string, loginUID string) (*UserDetailResp, e
 		fmt.Printf("UID为 %s 的电商用户不存在\n", uid)
 	} else {
 		mallUserName = GenerateString(mallUserInfo)
+		remark = mallUserInfo.UserID
 	}
 	if mallUserName == "" {
 		mallUserName = model.Name
