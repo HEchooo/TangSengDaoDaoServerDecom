@@ -319,7 +319,7 @@ func (w *Webhook) handleMsgOffline(data []byte) error {
 	if err != nil {
 		return err
 	}
-	w.Debug("收到离线消息->", zap.Any("msg", msgResp))
+	w.Info("收到离线消息->", zap.Any("msg", msgResp))
 
 	var toUids []string
 	if msgResp.Compress == "gzip" {

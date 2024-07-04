@@ -1,3 +1,4 @@
+
 build:
 	docker build -t tangsengdaodaoserver .
 push:

@@ -464,7 +464,7 @@ func (u *User) userIM(c *wkhttp.Context) {
 
 	// 修改 ws_addr 字段
 	//if ok :=; ok {
-	resultMap["ws_addr"] = "wss://im-ws.alvinclub.ca"
+	//resultMap["ws_addr"] = "wss://im-ws.alvinclub.ca"
 	//}
 
 	c.JSON(resp.StatusCode, resultMap)
