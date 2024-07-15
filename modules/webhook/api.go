@@ -21,7 +21,6 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -319,7 +318,7 @@ func (w *Webhook) handleMsgOffline(data []byte) error {
 	if err != nil {
 		return err
 	}
-	w.Debug("收到离线消息->", zap.Any("msg", msgResp))
+	w.Info("收到离线消息->", zap.Any("msg", msgResp))
 
 	var toUids []string
 	if msgResp.Compress == "gzip" {
@@ -629,21 +628,11 @@ func (w *Webhook) pushToEchoooApi(uid string, msgResp msgOfflineNotify) {
 			return
 		}
 		// 发送飞书通知
-		var webhookURL string
-		var contentMsg string
-		if os.Getenv("ENV") == "prod" {
-			// 生产
-			webhookURL = "https://open.feishu.cn/open-apis/bot/v2/hook/2389d188-c620-49e3-acb4-f33ba710c35f"
-			contentMsg = "<at user_id=\"all\">所有人</at> 线上有等待超过10分钟的客服消息, 需要处理."
-		} else {
-			// 其他
-			webhookURL = "https://open.feishu.cn/open-apis/bot/v2/hook/9e79a7e7-aca5-4e06-8055-ed26aa0051f7"
-			contentMsg = " (测试环境)有等待超过10分钟的客服消息, 需要处理."
-		}
+		webhookURL := "https://open.feishu.cn/open-apis/bot/v2/hook/6d6ed11d-8685-4cd3-9faf-4cb7553ecb77"
 		// 示例 Webhook 负载
 		var payload FeiShuWebhookPayload
 		payload.MsgType = "text"
-		payload.Content.Text = contentMsg
+		payload.Content.Text = "<at user_id=\"all\">所有人</at> 有等待超过10分钟的客服消息, 需要处理."
 
 		// 发送 Webhook
 		err2 := SendFeiShuWebhook(webhookURL, payload)
