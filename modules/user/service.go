@@ -82,8 +82,9 @@ type IService interface {
 
 // Service Service
 type Service struct {
-	ctx *config.Context
-	db  *DB
+	mallConfig *config.EchoooPush
+	ctx        *config.Context
+	db         *DB
 	log.Log
 	friendDB         *friendDB
 	onlineDB         *onlineDB
@@ -222,7 +223,25 @@ func (s *Service) GetUserDetail(uid string, loginUID string) (*UserDetailResp, e
 	if toUserSetting != nil {
 		beBlacklist = toUserSetting.Blacklist
 	}
-	return NewUserDetailResp(model, remark, loginUID, sourceFrom, online, lastOffline, deviceFlag, follow, blacklist, beDeleted, beBlacklist, userSetting, vercode), nil
+	uids := []string{uid}
+	mallUserDetails, err2 := s.GetMallUserDetails(uids)
+	if err2 != nil {
+		s.Error("查询电商用户详情失败！", zap.Error(err2))
+	}
+	// 获取特定UID的用户信息并生成字符串
+	mallUserName := ""
+	mallUserInfo, exists := mallUserDetails[uid]
+	if !exists {
+		fmt.Printf("UID为 %s 的电商用户不存在\n", uid)
+	} else {
+		mallUserName = GenerateString(mallUserInfo)
+		// SourceDesc 电商用户id
+		sourceFrom = mallUserInfo.UserID
+	}
+	if mallUserName == "" {
+		mallUserName = model.Name
+	}
+	return NewUserDetailResp(model, remark, loginUID, sourceFrom, online, lastOffline, deviceFlag, follow, blacklist, beDeleted, beBlacklist, userSetting, vercode, mallUserName), nil
 }
 
 func (s *Service) GetUserDetails(uids []string, loginUID string) ([]*UserDetailResp, error) {
@@ -357,10 +376,79 @@ func (s *Service) GetUserDetails(uids []string, loginUID string) ([]*UserDetailR
 		} else {
 			beDeleted = 1
 		}
-		userDetailResps = append(userDetailResps, NewUserDetailResp(userDetail, nameRemark, loginUID, sourceFrom, online, lastOffline, deviceFlag, follow, status, beDeleted, beBlacklist, setting, vercode))
+
+		mallUserDetails, err2 := s.GetMallUserDetails(uids)
+		if err2 != nil {
+			s.Error("查询电商用户详情失败！", zap.Error(err2))
+		}
+		mallUserName := ""
+		//mallUserInfo := mallUserDetails[uid]
+		// 获取特定UID的用户信息并生成字符串
+		mallUserInfo, exists := mallUserDetails[uid]
+		if !exists {
+			fmt.Printf("UID为 %s 的电商用户不存在\n", uid)
+		} else {
+			mallUserName = GenerateString(mallUserInfo)
+			// 同步电商注销状态
+			userDetail.IsDestroy = mallUserInfo.Deleted
+			// SourceDesc 电商用户id
+			sourceFrom = mallUserInfo.UserID
+		}
+		if mallUserName == "" {
+			mallUserName = userDetail.Name
+		}
+		userDetailResps = append(userDetailResps, NewUserDetailResp(userDetail, nameRemark, loginUID, sourceFrom, online, lastOffline, deviceFlag, follow, status, beDeleted, beBlacklist, setting, vercode, mallUserName))
 	}
 
 	return userDetailResps, nil
+}
+
+// GenerateString 根据规则生成返回字符串
+func GenerateString(userInfo UserInfo) string {
+	if userInfo.Nickname != "" {
+		return userInfo.Nickname
+	}
+	if userInfo.PhoneNumber != "" {
+		return MaskPhoneNumber(userInfo.PhoneNumber)
+	}
+	if userInfo.Email != "" {
+		return MaskEmail(userInfo.Email)
+	}
+	if userInfo.ThirdPartyEmail != "" {
+		return MaskEmail(userInfo.ThirdPartyEmail)
+	}
+	return ""
+}
+
+// MaskPhoneNumber 脱敏电话号码
+func MaskPhoneNumber(phone string) string {
+	parts := strings.Split(phone, "+")
+	if len(parts) != 2 {
+		log.Info("手机号格式不正确")
+		return phone
+	}
+
+	areaCode := parts[0]
+	phoneNumber := parts[1]
+
+	if len(phoneNumber) < 7 {
+		log.Info("手机号<7位")
+		return "+" + areaCode + " " + phoneNumber
+	}
+	if len(areaCode) < 2 {
+		return "+" + areaCode + " " + phoneNumber[:1] + "****" + phoneNumber[len(phoneNumber)-4:]
+	} else {
+		return "+" + areaCode + "" + "****" + phoneNumber[len(phoneNumber)-4:]
+	}
+}
+
+// MaskEmail 脱敏邮箱地址
+func MaskEmail(email string) string {
+	parts := strings.Split(email, "@")
+	if len(parts) != 2 {
+		return email
+	}
+	return string(parts[0][0]) + "***@" + parts[1]
 }
 
 // GetUserOnlineStatus 查询在线用户
@@ -885,7 +973,7 @@ type UserDetailResp struct {
 	FlameSecond    int               `json:"flame_second"`     // 阅后即焚秒数
 }
 
-func NewUserDetailResp(m *Detail, remark, loginUID string, sourceFrom string, onLine int, lastOffline int, deviceFlag config.DeviceFlag, follow int, status int, beDeleted int, beBlacklist int, setting *SettingModel, vercode string) *UserDetailResp {
+func NewUserDetailResp(m *Detail, remark, loginUID, sourceFrom string, onLine, lastOffline int, deviceFlag config.DeviceFlag, follow, status, beDeleted, beBlacklist int, setting *SettingModel, vercode, userName string) *UserDetailResp {
 	self := loginUID == m.UID
 
 	email := ""
@@ -910,7 +998,7 @@ func NewUserDetailResp(m *Detail, remark, loginUID string, sourceFrom string, on
 
 	return &UserDetailResp{
 		UID:            m.UID,
-		Name:           m.Name,
+		Name:           userName,
 		Email:          email,
 		Zone:           zone,
 		Phone:          phone,

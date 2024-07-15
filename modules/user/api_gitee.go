@@ -522,24 +522,24 @@ type MallResponse struct {
 }
 
 type MallUser struct {
-	ID              int     `json:"id"`
-	UserID          string  `json:"userId"`
-	Nickname        string  `json:"nickname"`
-	Description     string  `json:"description"`
-	Gender          int     `json:"gender"`
-	Birthday        *string `json:"birthday"`
-	Photo           string  `json:"photo"`
-	PhoneNumber     string  `json:"phoneNumber"`
-	Email           string  `json:"email"`
-	ThirdPartyEmail string  `json:"thirdPartyEmail"`
-	SignUpType      int     `json:"signUpType"`
-	Platform        string  `json:"platform"`
-	GoogleUsername  *string `json:"googleUsername"`
-	AppleUsername   *string `json:"appleUsername"`
-	CreateTime      string  `json:"createTime"`
-	UserType        int     `json:"userType"`
-	Deleted         int     `json:"deleted"`
-	Status          int     `json:"status"`
+	ID              int    `json:"id"`
+	UserID          string `json:"userId"`
+	Nickname        string `json:"nickname"`
+	Description     string `json:"description"`
+	Gender          int    `json:"gender"`
+	Birthday        string `json:"birthday"`
+	Photo           string `json:"photo"`
+	PhoneNumber     string `json:"phoneNumber"`
+	Email           string `json:"email"`
+	ThirdPartyEmail string `json:"thirdPartyEmail"`
+	SignUpType      int    `json:"signUpType"`
+	Platform        string `json:"platform"`
+	GoogleUsername  string `json:"googleUsername"`
+	AppleUsername   string `json:"appleUsername"`
+	CreateTime      string `json:"createTime"`
+	UserType        int    `json:"userType"`
+	Deleted         int    `json:"deleted"`
+	Status          int    `json:"status"`
 }
 
 func (g *giteeUserInfo) toModel() *gitUserInfoModel {

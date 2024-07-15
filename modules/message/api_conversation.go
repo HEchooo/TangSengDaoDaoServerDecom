@@ -86,8 +86,16 @@ func (co *Conversation) Route(r *wkhttp.WKHttp) {
 
 	}
 
+	// mall调用不需要登录
+	mallConversation := r.Group("/v1/mall")
+	{
+		// 查询用户是否有未读消息
+		mallConversation.GET("/conversation/haveUnRead", co.getUserUnreadConversation)
+	}
+
 	conversation := r.Group("/v1/conversation", co.ctx.AuthMiddleware(r))
 	{
+
 		// 离线的最近会话
 		conversation.POST("/sync", co.syncUserConversation)
 		conversation.POST("/syncack", co.syncUserConversationAck)
@@ -211,6 +219,59 @@ func (co *Conversation) deleteConversation(c *wkhttp.Context) {
 		return
 	}
 	c.ResponseOK()
+}
+
+// 查询用户是否有未读消息
+func (co *Conversation) getUserUnreadConversation(c *wkhttp.Context) {
+	//var req struct {
+	//	LoginUID    string `json:"uid"`           // uid
+	//	Version     int64  `json:"version"`       // 当前客户端的会话最大版本号(客户端最新会话的时间戳)
+	//	LastMsgSeqs string `json:"last_msg_seqs"` // 客户端所有会话的最后一条消息序列号 格式： channelID:channelType:last_msg_seq|channelID:channelType:last_msg_seq
+	//	MsgCount    int64  `json:"msg_count"`     // 每个会话消息数量
+	//	DeviceUUID  string `json:"device_uuid"`   // 设备uuid
+	//}
+	//version := req.Version
+	//loginUID := req.LoginUID
+	//lastMsgSeqs := req.LastMsgSeqs
+	largeChannels := make([]*config.Channel, 0)
+
+	version, err := strconv.ParseInt(c.Query("version"), 10, 64)
+	loginUID := c.Query("uid")
+	lastMsgSeqs := c.Query("last_msg_seqs")
+	// deviceUUID := c.Query("device_uuid")
+	msgCount, err := strconv.ParseInt(c.Query("msg_count"), 10, 64)
+
+	//if len(largeGroupInfos) > 0 {
+	//	for _, largeGroupInfo := range largeGroupInfos {
+	//		largeChannels = append(largeChannels, &config.Channel{
+	//			ChannelID:   largeGroupInfo.GroupNo,
+	//			ChannelType: common.ChannelTypeGroup.Uint8(),
+	//		})
+	//	}
+	//}
+
+	conversations, err := co.ctx.IMSyncUserConversation(loginUID, version, msgCount, lastMsgSeqs, largeChannels)
+	if err != nil {
+		co.Error("会话管理-同步离线后的最近会话失败！", zap.Error(err), zap.String("loginUID", loginUID))
+		c.ResponseError(errors.New("会话管理-同步离线后的最近会话失败！"))
+		return
+	}
+
+	co.Info("查询用户离线消息成功,条数" + strconv.Itoa(len(conversations)))
+	if len(conversations) > 0 {
+		for _, conversation := range conversations {
+			if conversation.Unread > 0 {
+				c.JSON(http.StatusOK, gin.H{
+					"hasUnread": true,
+				})
+				return
+			}
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"hasUnread": false,
+	})
 }
 
 // 获取离线的最近会话
@@ -341,7 +402,6 @@ func (co *Conversation) syncUserConversation(c *wkhttp.Context) {
 		"854cad7fe11344b3aff939969da025a4": true,
 		"1d5e315ea3e447e6b7d0a886ac8c9910": true,
 		"811be418330f4febabe9e2318779f7bb": true,
-		"63dc69dd30c446e88ef388f7c47413eb": true,
 	}
 
 	groupNos := make([]string, 0, len(conversations))
