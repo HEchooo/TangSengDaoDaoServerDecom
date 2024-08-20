@@ -433,7 +433,7 @@ func (u *User) requestMallAccessToken(code string, env string) (*MallUser, error
 	} else if env == "prod" {
 		url = "https://api.alvinclub.ca/user-service/user/get"
 	} else if env == "stage" {
-		url = "https://api.alvinclub.ca/user-service/user/get"
+		url = "https://stage-api.alvinclub.ca/user-service/user/get"
 	}
 
 	req, err := http.NewRequest("GET", url, nil)
