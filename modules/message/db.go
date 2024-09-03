@@ -31,25 +31,20 @@ func NewDB(ctx *config.Context) *DB {
 // 	return err
 // }
 
-func (d *DB) queryMessageWithKeys(key string) ([]*messageModel, error) {
-	var models []*messageModel
+func (d *DB) queryMessageWithKeys(key string) ([]*messageModelSimple, error) {
+	var models []*messageModelSimple
 
 	// 构建 SQL 查询字符串
 	query := `
-		SELECT message_id, message_seq, client_msg_no, header, setting, from_uid, channel_id, 
-			channel_type, timestamp, payload, is_deleted, signal, expire  FROM message WHERE payload LIKE ?
-		UNION ALL
-		SELECT message_id, message_seq, client_msg_no, header, setting, from_uid, channel_id, 
-			channel_type, timestamp, payload, is_deleted, signal, expire   FROM message1 WHERE payload LIKE ?
-		UNION ALL
-		SELECT message_id, message_seq, client_msg_no, header, setting, from_uid, channel_id, 
-			channel_type, timestamp, payload, is_deleted, signal, expire   FROM message2 WHERE payload LIKE ?
-		UNION ALL
-		SELECT message_id, message_seq, client_msg_no, header, setting, from_uid, channel_id, 
-			channel_type, timestamp, payload, is_deleted, signal, expire   FROM message3 WHERE payload LIKE ?
-		UNION ALL
-		SELECT message_id, message_seq, client_msg_no, header, setting, from_uid, channel_id, 
-			channel_type, timestamp, payload, is_deleted, signal, expire   FROM message4 WHERE payload LIKE ?`
+		SELECT message_id, message_seq, client_msg_no, header, setting, from_uid, channel_id, channel_type, timestamp, payload  FROM message WHERE payload LIKE ?
+		UNION 
+		SELECT message_id, message_seq, client_msg_no, header, setting, from_uid, channel_id, channel_type, timestamp, payload   FROM message1 WHERE payload LIKE ?
+		UNION 
+		SELECT message_id, message_seq, client_msg_no, header, setting, from_uid, channel_id, channel_type, timestamp, payload   FROM message2 WHERE payload LIKE ?
+		UNION 
+		SELECT message_id, message_seq, client_msg_no, header, setting, from_uid, channel_id, channel_type, timestamp, payload   FROM message3 WHERE payload LIKE ?
+		UNION 
+		SELECT message_id, message_seq, client_msg_no, header, setting, from_uid, channel_id, channel_type, timestamp, payload  FROM message4 WHERE payload LIKE ?`
 
 	// 执行查询
 	rows, err := d.session.Query(query, "%"+key+"%", "%"+key+"%", "%"+key+"%", "%"+key+"%", "%"+key+"%")
@@ -61,7 +56,7 @@ func (d *DB) queryMessageWithKeys(key string) ([]*messageModel, error) {
 	// 遍历结果集
 	for rows.Next() {
 		// 创建一个新的 messageModel 实例
-		m := &messageModel{}
+		m := &messageModelSimple{}
 
 		// 使用 Scan 方法将当前行数据读取到结构体中
 		err := rows.Scan(
@@ -75,9 +70,6 @@ func (d *DB) queryMessageWithKeys(key string) ([]*messageModel, error) {
 			&m.ChannelType,
 			&m.Timestamp,
 			&m.Payload,
-			&m.IsDeleted,
-			&m.Signal,
-			&m.Expire,
 		)
 		if err != nil {
 			return nil, err
@@ -208,4 +200,18 @@ type messageModel struct {
 	Signal    int
 	Expire    uint32
 	db.BaseModel
+}
+
+type messageModelSimple struct {
+	MessageID   int64
+	MessageSeq  uint32
+	ClientMsgNo string
+	Header      string
+	Setting     uint8
+	FromUID     string
+	ChannelID   string
+	ChannelType uint8
+	Timestamp   int64
+	Payload     []byte
+	IsDeleted   int
 }
