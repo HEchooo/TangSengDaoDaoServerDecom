@@ -96,7 +96,7 @@ func (m *Message) Route(r *wkhttp.WKHttp) {
 		message.POST("/offset", m.offset)                         // 清除某频道消息
 		message.PUT("/voicereaded", m.voiceReaded)                // 语音消息设置为已读
 		message.POST("/search", m.search)                         // 消息搜索
-		message.POST("/search2", m.search)                        // 消息搜索唐僧
+		message.POST("/search2", m.search2)                       // 消息搜索唐僧
 		message.POST("/typing", m.typing)                         // 发送typing消息
 		message.POST("/channel/sync", m.syncChannelMessage)       // 同步频道消息
 		message.POST("/extra/sync", m.syncMessageExtra)           // 同步消息扩展
