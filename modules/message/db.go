@@ -36,15 +36,16 @@ func (d *DB) queryMessageWithKeys(key string) ([]*messageModelSimple, error) {
 
 	// 构建 SQL 查询字符串
 	query := `
-		SELECT message_id, message_seq, client_msg_no, header, setting, from_uid, channel_id, channel_type, timestamp, payload  FROM message WHERE payload LIKE ?
+		SELECT message_id, message_seq, client_msg_no, from_uid, channel_id, channel_type, timestamp, payload as content  FROM message WHERE payload LIKE ?
 		UNION 
-		SELECT message_id, message_seq, client_msg_no, header, setting, from_uid, channel_id, channel_type, timestamp, payload   FROM message1 WHERE payload LIKE ?
+		SELECT message_id, message_seq, client_msg_no, from_uid, channel_id, channel_type, timestamp, payload  as content  FROM message1 WHERE payload LIKE ?
 		UNION 
-		SELECT message_id, message_seq, client_msg_no, header, setting, from_uid, channel_id, channel_type, timestamp, payload   FROM message2 WHERE payload LIKE ?
+		SELECT message_id, message_seq, client_msg_no, from_uid, channel_id, channel_type, timestamp, payload  as content  FROM message2 WHERE payload LIKE ?
 		UNION 
-		SELECT message_id, message_seq, client_msg_no, header, setting, from_uid, channel_id, channel_type, timestamp, payload   FROM message3 WHERE payload LIKE ?
+		SELECT message_id, message_seq, client_msg_no, from_uid, channel_id, channel_type, timestamp, payload  as content  FROM message3 WHERE payload LIKE ?
 		UNION 
-		SELECT message_id, message_seq, client_msg_no, header, setting, from_uid, channel_id, channel_type, timestamp, payload  FROM message4 WHERE payload LIKE ?`
+		SELECT message_id, message_seq, client_msg_no, from_uid, channel_id, channel_type, timestamp, payload  as content FROM message4 WHERE payload LIKE ? 
+		limit 50 `
 
 	// 执行查询
 	rows, err := d.session.Query(query, "%"+key+"%", "%"+key+"%", "%"+key+"%", "%"+key+"%", "%"+key+"%")
@@ -63,8 +64,6 @@ func (d *DB) queryMessageWithKeys(key string) ([]*messageModelSimple, error) {
 			&m.MessageID,
 			&m.MessageSeq,
 			&m.ClientMsgNo,
-			&m.Header,
-			&m.Setting,
 			&m.FromUID,
 			&m.ChannelID,
 			&m.ChannelType,
@@ -206,12 +205,9 @@ type messageModelSimple struct {
 	MessageID   int64
 	MessageSeq  uint32
 	ClientMsgNo string
-	Header      string
-	Setting     uint8
 	FromUID     string
 	ChannelID   string
 	ChannelType uint8
 	Timestamp   int64
-	Payload     []byte
-	IsDeleted   int
+	Payload     string
 }
