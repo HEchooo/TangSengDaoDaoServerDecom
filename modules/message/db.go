@@ -36,15 +36,20 @@ func (d *DB) queryMessageWithKeys(key string) ([]*messageModel, error) {
 
 	// 构建 SQL 查询字符串
 	query := `
-		SELECT * FROM message WHERE payload LIKE ?
+		SELECT message_id, message_seq, client_msg_no, header, setting, from_uid, channel_id, 
+			channel_type, timestamp, payload, is_deleted, signal, expire  FROM message WHERE payload LIKE ?
 		UNION ALL
-		SELECT * FROM message1 WHERE payload LIKE ?
+		SELECT message_id, message_seq, client_msg_no, header, setting, from_uid, channel_id, 
+			channel_type, timestamp, payload, is_deleted, signal, expire   FROM message1 WHERE payload LIKE ?
 		UNION ALL
-		SELECT * FROM message2 WHERE payload LIKE ?
+		SELECT message_id, message_seq, client_msg_no, header, setting, from_uid, channel_id, 
+			channel_type, timestamp, payload, is_deleted, signal, expire   FROM message2 WHERE payload LIKE ?
 		UNION ALL
-		SELECT * FROM message3 WHERE payload LIKE ?
+		SELECT message_id, message_seq, client_msg_no, header, setting, from_uid, channel_id, 
+			channel_type, timestamp, payload, is_deleted, signal, expire   FROM message3 WHERE payload LIKE ?
 		UNION ALL
-		SELECT * FROM message4 WHERE payload LIKE ?`
+		SELECT message_id, message_seq, client_msg_no, header, setting, from_uid, channel_id, 
+			channel_type, timestamp, payload, is_deleted, signal, expire   FROM message4 WHERE payload LIKE ?`
 
 	// 执行查询
 	rows, err := d.session.Query(query, "%"+key+"%", "%"+key+"%", "%"+key+"%", "%"+key+"%", "%"+key+"%")
