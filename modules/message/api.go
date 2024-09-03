@@ -96,6 +96,7 @@ func (m *Message) Route(r *wkhttp.WKHttp) {
 		message.POST("/offset", m.offset)                         // 清除某频道消息
 		message.PUT("/voicereaded", m.voiceReaded)                // 语音消息设置为已读
 		message.POST("/search", m.search)                         // 消息搜索
+		message.POST("/search2", m.search)                        // 消息搜索唐僧
 		message.POST("/typing", m.typing)                         // 发送typing消息
 		message.POST("/channel/sync", m.syncChannelMessage)       // 同步频道消息
 		message.POST("/extra/sync", m.syncMessageExtra)           // 同步消息扩展
@@ -777,6 +778,27 @@ func (m *Message) search(c *wkhttp.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, results)
+}
+
+// 搜索唐僧
+func (m *Message) search2(c *wkhttp.Context) {
+	var req struct {
+		Keyword string `json:"keyword"`
+	}
+	if err := c.BindJSON(&req); err != nil {
+		m.Error("数据格式有误！", zap.Error(err))
+		c.ResponseError(err)
+		return
+	}
+	fmt.Println("req->", req)
+	messages, err := m.db.queryMessageWithKeys(req.Keyword)
+
+	if err != nil {
+		m.Error("解析搜索数据失败！", zap.Error(err))
+		c.ResponseError(errors.New("解析搜索数据失败！"))
+		return
+	}
+	c.JSON(http.StatusOK, messages)
 }
 
 // 语音消息设置为已读
