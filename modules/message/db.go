@@ -3,6 +3,7 @@ package message
 import (
 	"fmt"
 	"hash/crc32"
+	"reflect"
 
 	"github.com/TangSengDaoDao/TangSengDaoDaoServerLib/config"
 	"github.com/TangSengDaoDao/TangSengDaoDaoServerLib/pkg/db"
@@ -29,6 +30,61 @@ func NewDB(ctx *config.Context) *DB {
 // 	_, err := tx.InsertInto("message").Columns(util.AttrToUnderscore(m)...).Record(m).Exec()
 // 	return err
 // }
+
+func (d *DB) queryMessageWithKeys(key string) ([]*messageModelSimple, error) {
+	var models []*messageModelSimple
+
+	// 构建 SQL 查询字符串
+	query := `
+		SELECT message_id, message_seq, client_msg_no, from_uid, channel_id, channel_type, timestamp, payload as content  FROM message WHERE payload LIKE ?
+		UNION 
+		SELECT message_id, message_seq, client_msg_no, from_uid, channel_id, channel_type, timestamp, payload  as content  FROM message1 WHERE payload LIKE ?
+		UNION 
+		SELECT message_id, message_seq, client_msg_no, from_uid, channel_id, channel_type, timestamp, payload  as content  FROM message2 WHERE payload LIKE ?
+		UNION 
+		SELECT message_id, message_seq, client_msg_no, from_uid, channel_id, channel_type, timestamp, payload  as content  FROM message3 WHERE payload LIKE ?
+		UNION 
+		SELECT message_id, message_seq, client_msg_no, from_uid, channel_id, channel_type, timestamp, payload  as content FROM message4 WHERE payload LIKE ? 
+		limit 50 `
+
+	// 执行查询
+	rows, err := d.session.Query(query, "%"+key+"%", "%"+key+"%", "%"+key+"%", "%"+key+"%", "%"+key+"%")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// 遍历结果集
+	for rows.Next() {
+		// 创建一个新的 messageModel 实例
+		m := &messageModelSimple{}
+
+		// 使用 Scan 方法将当前行数据读取到结构体中
+		err := rows.Scan(
+			&m.MessageID,
+			&m.MessageSeq,
+			&m.ClientMsgNo,
+			&m.FromUID,
+			&m.ChannelID,
+			&m.ChannelType,
+			&m.Timestamp,
+			&m.Payload,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		// 将读取到的结构体添加到结果切片中
+		models = append(models, m)
+	}
+
+	// 检查查询是否有错误
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return models, nil
+}
 
 func (d *DB) queryMessageWithMessageID(channelID string, channelType uint8, messageID string) (*messageModel, error) {
 	var m *messageModel
@@ -85,6 +141,47 @@ type ProhibitWordModel struct {
 	db.BaseModel
 }
 
+// mapToStruct 将数据库查询结果的 map 转换为结构体
+func mapToStruct(m map[string]interface{}, result interface{}) error {
+	// 获取目标结构体的值和类型
+	val := reflect.ValueOf(result).Elem()
+	typ := val.Type()
+
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Field(i)
+		fieldType := typ.Field(i)
+		columnName := fieldType.Name
+
+		// 获取 map 中的值
+		if value, ok := m[columnName]; ok {
+			// 使用反射将值设置到结构体字段中
+			if field.CanSet() {
+				switch field.Kind() {
+				case reflect.Int64:
+					field.SetInt(value.(int64))
+				case reflect.Uint32:
+					switch v := value.(type) {
+					case int64:
+						field.SetUint(uint64(v))
+					case uint32:
+						field.SetUint(uint64(v))
+					}
+				case reflect.String:
+					field.SetString(value.(string))
+				case reflect.Uint8:
+					field.SetUint(uint64(value.(int64)))
+				case reflect.Int:
+					field.SetInt(value.(int64))
+				case reflect.Slice:
+					// 假设字段是 []byte
+					field.SetBytes(value.([]byte))
+				}
+			}
+		}
+	}
+	return nil
+}
+
 // Model 消息model
 type messageModel struct {
 	MessageID   int64
@@ -102,4 +199,15 @@ type messageModel struct {
 	Signal    int
 	Expire    uint32
 	db.BaseModel
+}
+
+type messageModelSimple struct {
+	MessageID   int64
+	MessageSeq  uint32
+	ClientMsgNo string
+	FromUID     string
+	ChannelID   string
+	ChannelType uint8
+	Timestamp   int64
+	Payload     string
 }
