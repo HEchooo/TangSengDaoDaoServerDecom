@@ -166,4 +166,4 @@ require (
 )
 
 // replace github.com/TangSengDaoDao/TangSengDaoDaoServerLib => ../TangSengDaoDaoServerLib
-replace github.com/TangSengDaoDao/TangSengDaoDaoServerLib => github.com/Hechooo/TangSengDaoDaoServerLib v0.0.0-20240616132029-80e96f1dac5c
+replace github.com/TangSengDaoDao/TangSengDaoDaoServerLib => github.com/Hechooo/TangSengDaoDaoServerLib v0.0.0-202411181209

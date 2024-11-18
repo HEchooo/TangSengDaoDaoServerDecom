@@ -43,6 +43,7 @@ type appConfigModel struct {
 	SuperTokenOn                   int
 	RevokeSecond                   int    // 消息可撤回时长
 	WelcomeMessage                 string // 登录欢迎语
+	WelcomeMessageEn               string // 登录欢迎语 English
 	NewUserJoinSystemGroup         int    // 新用户是否加入系统群聊
 	SearchByPhone                  int    // 是否可通过手机号搜索
 	RegisterInviteOn               int    // 开启注册邀请机制

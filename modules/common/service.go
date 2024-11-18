@@ -60,6 +60,7 @@ func (s *service) GetAppConfig() (*AppConfigResp, error) {
 		SuperToken:                     appConfigM.SuperToken,
 		SuperTokenOn:                   appConfigM.SuperTokenOn,
 		WelcomeMessage:                 appConfigM.WelcomeMessage,
+		WelcomeMessageEn:               appConfigM.WelcomeMessageEn,
 		NewUserJoinSystemGroup:         appConfigM.NewUserJoinSystemGroup,
 		SearchByPhone:                  appConfigM.SearchByPhone,
 		RegisterInviteOn:               appConfigM.RegisterInviteOn,
@@ -133,6 +134,7 @@ type AppConfigResp struct {
 	SuperToken                     string
 	SuperTokenOn                   int
 	WelcomeMessage                 string // 登录欢迎语
+	WelcomeMessageEn               string // 登录欢迎语
 	NewUserJoinSystemGroup         int    // 新用户是否加入系统群聊
 	SearchByPhone                  int    // 是否可通过手机号搜索
 	RegisterInviteOn               int    // 是否开启注册邀请
