@@ -1117,6 +1117,7 @@ func (u *User) sentWelcomeMsg(publicIP, uid, language string) {
 		//ipStr := fmt.Sprintf("本次登录的信息：%s %s", publicIP, util.ToyyyyMMddHHmmss(time.Now()))
 		sentContent = fmt.Sprintf("%s", content)
 	}
+	u.Log.Info("sentWelcomeMsg", zap.String("language", language))
 	if "en_US" == language {
 		content = appconfig.WelcomeMessageEn
 		sentContent = fmt.Sprintf("%s", content)
