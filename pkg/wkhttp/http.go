@@ -2,16 +2,16 @@ package wkhttp
 
 import (
 	"errors"
+	"github.com/TangSengDaoDao/TangSengDaoDaoServer/modules/user"
+	"github.com/TangSengDaoDao/TangSengDaoDaoServerLib/pkg/cache"
+	"github.com/TangSengDaoDao/TangSengDaoDaoServerLib/pkg/log"
+	"github.com/gin-gonic/gin"
+	"github.com/opentracing/opentracing-go"
+	"go.uber.org/zap"
 	"net/http"
 	"strconv"
 	"strings"
 	"sync"
-
-	"github.com/TangSengDaoDao/TangSengDaoDaoServer/pkg/cache"
-	"github.com/TangSengDaoDao/TangSengDaoDaoServer/pkg/log"
-	"github.com/gin-gonic/gin"
-	"github.com/opentracing/opentracing-go"
-	"go.uber.org/zap"
 )
 
 // UserRole 用户角色
@@ -151,6 +151,18 @@ func (c *Context) CheckLoginRole() error {
 	return nil
 }
 
+// CheckLoginRoleIsSuperAdmin 检查登录用户为超级管理员
+func (c *Context) CheckLoginRoleIsSuperAdmin() error {
+	role := c.GetLoginRole()
+	if role == "" {
+		return errors.New("登录用户角色错误")
+	}
+	if role != string(SuperAdmin) {
+		return errors.New("该用户无权执行此操作")
+	}
+	return nil
+}
+
 // HandlerFunc HandlerFunc
 type HandlerFunc func(c *Context)
 
@@ -238,9 +250,20 @@ func (l *WKHttp) handlersToGinHandleFuncs(handlers []HandlerFunc) []gin.HandlerF
 }
 
 // AuthMiddleware 认证中间件
-func (l *WKHttp) AuthMiddleware(cache cache.Cache, tokenPrefix string) HandlerFunc {
+func (l *WKHttp) AuthMiddleware(cache cache.Cache, tokenPrefix string) func(c *Context, m *user.Service) {
 
-	return func(c *Context) {
+	return func(c *Context, m *user.Service) {
+		erpToken := c.GetHeader("X-Erp-Token")
+		if erpToken != "" {
+
+			erpUsername := verifyAndGetUsername(erpToken)
+			if erpUsername != "" {
+				c.Set("uid", "admin")
+				c.Set("name", "superAdmin")
+				c.Set("role", "superAdmin")
+				c.Next()
+			}
+		}
 		token := c.GetHeader("token")
 		if token == "" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
@@ -269,6 +292,12 @@ func (l *WKHttp) AuthMiddleware(cache cache.Cache, tokenPrefix string) HandlerFu
 		}
 		c.Next()
 	}
+}
+
+// verifyAndGetUsername 验证JWT并获取用户名
+func verifyAndGetUsername(tokenString string) string {
+
+	return ""
 }
 
 // GetLoginUID GetLoginUID

@@ -1072,7 +1072,7 @@ func (u *User) execLogin(userInfo *Model, flag config.DeviceFlag, device *device
 }
 
 // sendWelcomeMsg 发送欢迎语
-func (u *User) sentWelcomeMsg(publicIP, uid string) {
+func (u *User) sentWelcomeMsg(publicIP, uid, language string) {
 	appconfig, err := u.commonService.GetAppConfig()
 	if err != nil {
 		u.Error("获取应用配置错误", zap.Error(err))
@@ -1117,6 +1117,12 @@ func (u *User) sentWelcomeMsg(publicIP, uid string) {
 		//ipStr := fmt.Sprintf("本次登录的信息：%s %s", publicIP, util.ToyyyyMMddHHmmss(time.Now()))
 		sentContent = fmt.Sprintf("%s", content)
 	}
+	u.Log.Info("sentWelcomeMsg", zap.String("language", language))
+	if "en_US" == language {
+		content = appconfig.WelcomeMessageEn
+		sentContent = fmt.Sprintf("%s", content)
+	}
+
 	if sendMsg {
 		err = u.ctx.SendMessage(&config.MsgSendReq{
 			FromUID:     u.ctx.GetConfig().Account.SystemUID,
@@ -2434,7 +2440,8 @@ func (u *User) sendWelcomeMsgV1(c *wkhttp.Context) {
 	}
 	// 使用 goroutine 异步发送欢迎消息
 	go func() {
-		u.sentWelcomeMsg(publicIP, loginUID)
+		language := c.GetHeader("Accept-Language")
+		u.sentWelcomeMsg(publicIP, loginUID, language)
 	}()
 
 	c.ResponseOK()
