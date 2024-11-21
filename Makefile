@@ -18,6 +18,3 @@ stop-dev:
 	docker-compose stop
 env-test:
 	docker-compose -f ./testenv/docker-compose.yaml up -d 
-
-
-	    image: registry.cn-shanghai.aliyuncs.com/wukongim/tangsengdaodaoserver:v1.5
