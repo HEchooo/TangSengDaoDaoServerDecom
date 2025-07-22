@@ -676,7 +676,7 @@ func (u *User) requestDecomAccessToken(code string, env string, referer string) 
 
 	fmt.Println("获取Decom用户信息-result-->", resp)
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("Error reading response body:", err)
 		return nil, err

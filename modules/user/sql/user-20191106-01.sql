@@ -51,7 +51,7 @@ CREATE UNIQUE INDEX short_no_udx on `user` (short_no);
 -- -- +migrate StatementEnd
 
 -- 创建系统账号
-INSERT INTO `user` (uid,name,short_no,phone,zone,search_by_phone,search_by_short,new_msg_notice,voice_on,shock_on,msg_show_detail,status,is_upload_avatar,category,robot) VALUES ('u_10000','系统账号',10000,'13000000000','0086',0,0,0,0,0,0,1,1,'system',1);
+INSERT INTO `user` (uid,name,short_no,phone,zone,search_by_phone,search_by_short,new_msg_notice,voice_on,shock_on,msg_show_detail,status,is_upload_avatar,category,robot,password) VALUES ('u_10000','系统账号',10000,'13000000000','0086',0,0,0,0,0,0,1,1,'system',1,'fd3b0c4e2f8a5b6c7d8e9a0b1c2d3e4f5');
 INSERT INTO `user` (uid,name,short_no,phone,zone,search_by_phone,search_by_short,new_msg_notice,voice_on,shock_on,msg_show_detail,status,is_upload_avatar,category) VALUES ('fileHelper','文件传输助手',20000,'13000000001','0086',0,0,0,0,0,0,1,1,'system');
 -- 创建后台管理平台超级管理员账号 admin/admiN123456
 -- INSERT INTO `user` (uid,name,short_no,username,password,role,phone,zone,search_by_phone,search_by_short,new_msg_notice,voice_on,shock_on,msg_show_detail,status,is_upload_avatar,category) VALUES ('admin','超级管理员',30000,'admin','14c3a0db22308e34ca7dacb1806c0bdf','superAdmin','13000000002','0086',0,0,0,0,0,0,1,0,'system');
