@@ -968,6 +968,9 @@ func NewUserDetailResp(m *Detail, remark, loginUID, sourceFrom string, onLine, l
 	phone := ""
 	zone := ""
 	username := m.Username
+	if username == "" {
+		username = m.Name
+	}
 	if self {
 		email = m.Email
 		phone = m.Phone
