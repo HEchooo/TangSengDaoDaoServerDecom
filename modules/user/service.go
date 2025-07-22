@@ -377,14 +377,14 @@ func (s *Service) GetUserDetails(uids []string, loginUID string) ([]*UserDetailR
 			beDeleted = 1
 		}
 
-		mallUserDetails, err2 := s.GetMallUserDetails(uids)
-		if err2 != nil {
-			s.Error("查询电商用户详情失败！", zap.Error(err2))
-		}
-		mallUserName := ""
+		//mallUserDetails, err2 := s.GetMallUserDetails(uids)
+		//if err2 != nil {
+		//	s.Error("查询电商用户详情失败！", zap.Error(err2))
+		//}
+		mallUserName := userDetail.Username
 		//mallUserInfo := mallUserDetails[uid]
 		// 获取特定UID的用户信息并生成字符串
-		mallUserInfo, exists := mallUserDetails[uid]
+		/*mallUserInfo, exists := mallUserDetails[uid]
 		if !exists {
 			fmt.Printf("UID为 %s 的电商用户不存在\n", uid)
 		} else {
@@ -393,7 +393,7 @@ func (s *Service) GetUserDetails(uids []string, loginUID string) ([]*UserDetailR
 			userDetail.IsDestroy = mallUserInfo.Deleted
 			// SourceDesc 电商用户id
 			sourceFrom = mallUserInfo.UserID
-		}
+		}*/
 		if mallUserName == "" {
 			mallUserName = userDetail.Name
 		}
