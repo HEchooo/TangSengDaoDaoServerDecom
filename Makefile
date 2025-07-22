@@ -1,17 +1,17 @@
 
 build:
-	docker build -t tangsengdaodaoserver .
+	docker build -t tangsengdaodaoserverdecom .
 push:
-	docker tag tangsengdaodaoserver 851725583589.dkr.ecr.us-east-1.amazonaws.com/tangsengdaodaoserver:latest
-	docker push 851725583589.dkr.ecr.us-east-1.amazonaws.com/tangsengdaodaoserver:latest
+	docker tag tangsengdaodaoserverdecom 851725583589.dkr.ecr.us-east-1.amazonaws.com/tangsengdaodaoserverdecom:latest
+	docker push 851725583589.dkr.ecr.us-east-1.amazonaws.com/tangsengdaodaoserverdecom:latest
 deploy:
-	docker build -t tangsengdaodaoserver .
-	docker tag tangsengdaodaoserver 851725583589.dkr.ecr.us-east-1.amazonaws.com/tangsengdaodaoserver:latest
-	docker push 851725583589.dkr.ecr.us-east-1.amazonaws.com/tangsengdaodaoserver:latest
+	docker build -t tangsengdaodaoserverdecom .
+	docker tag tangsengdaodaoserverdecom 851725583589.dkr.ecr.us-east-1.amazonaws.com/tangsengdaodaoserverdecom:latest
+	docker push 851725583589.dkr.ecr.us-east-1.amazonaws.com/tangsengdaodaoserverdecom:latest
 deploy-v1.5:
-	docker build -t tangsengdaodaoserver .
-	docker tag tangsengdaodaoserver registry.cn-shanghai.aliyuncs.com/wukongim/tangsengdaodaoserver:v1.5
-	docker push registry.cn-shanghai.aliyuncs.com/wukongim/tangsengdaodaoserver:v1.5
+	docker build -t tangsengdaodaoserverdecom .
+	docker tag tangsengdaodaoserverdecom registry.cn-shanghai.aliyuncs.com/wukongim/tangsengdaodaoserverdecom:v1.5
+	docker push registry.cn-shanghai.aliyuncs.com/wukongim/tangsengdaodaoserverdecom:v1.5
 run-dev:
 	docker-compose build;docker-compose up -d
 stop-dev:
