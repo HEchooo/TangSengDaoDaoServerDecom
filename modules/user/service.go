@@ -223,21 +223,9 @@ func (s *Service) GetUserDetail(uid string, loginUID string) (*UserDetailResp, e
 	if toUserSetting != nil {
 		beBlacklist = toUserSetting.Blacklist
 	}
-	uids := []string{uid}
-	mallUserDetails, err2 := s.GetMallUserDetails(uids)
-	if err2 != nil {
-		s.Error("查询电商用户详情失败！", zap.Error(err2))
-	}
+
 	// 获取特定UID的用户信息并生成字符串
-	mallUserName := ""
-	mallUserInfo, exists := mallUserDetails[uid]
-	if !exists {
-		fmt.Printf("UID为 %s 的电商用户不存在\n", uid)
-	} else {
-		mallUserName = GenerateString(mallUserInfo)
-		// SourceDesc 电商用户id
-		sourceFrom = mallUserInfo.UserID
-	}
+	mallUserName := model.Username
 	if mallUserName == "" {
 		mallUserName = model.Name
 	}
@@ -979,7 +967,7 @@ func NewUserDetailResp(m *Detail, remark, loginUID, sourceFrom string, onLine, l
 	email := ""
 	phone := ""
 	zone := ""
-	username := ""
+	username := m.Username
 	if self {
 		email = m.Email
 		phone = m.Phone
@@ -998,7 +986,7 @@ func NewUserDetailResp(m *Detail, remark, loginUID, sourceFrom string, onLine, l
 
 	return &UserDetailResp{
 		UID:            m.UID,
-		Name:           userName,
+		Name:           m.Name,
 		Email:          email,
 		Zone:           zone,
 		Phone:          phone,
