@@ -7,6 +7,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"net"
+	"net/http"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/TangSengDaoDao/TangSengDaoDaoServer/modules/group"
 	"github.com/TangSengDaoDao/TangSengDaoDaoServer/modules/user"
 	"github.com/TangSengDaoDao/TangSengDaoDaoServerLib/common"
@@ -18,12 +25,6 @@ import (
 	"github.com/TangSengDaoDao/TangSengDaoDaoServerLib/pkg/wkhttp"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
-	"io/ioutil"
-	"net"
-	"net/http"
-	"strconv"
-	"strings"
-	"time"
 )
 
 // Webhook Webhook
@@ -54,7 +55,6 @@ func New(ctx *config.Context) *Webhook {
 	oppo := ctx.GetConfig().Push.OPPO
 	vivo := ctx.GetConfig().Push.VIVO
 	firebase := ctx.GetConfig().Push.FIREBASE
-	echoooPush := ctx.GetConfig().EchoooPush
 
 	if apns.Topic != "" && apns.Cert != "" {
 		pushMap[common.DeviceTypeIOS] = map[string]Push{
@@ -86,7 +86,6 @@ func New(ctx *config.Context) *Webhook {
 			ctx.GetConfig().Push.FIREBASE.PackageName: NewFIREBASEPush(firebase.JsonPath, firebase.PackageName, firebase.ProjectId, ""),
 		}
 	}
-	hookEchoooPush := NewEchoooPush(echoooPush.ServerAddresses, ctx)
 
 	return &Webhook{
 		db:           NewDB(ctx.DB()),
@@ -94,7 +93,7 @@ func New(ctx *config.Context) *Webhook {
 		ctx:          ctx,
 		Log:          log.NewTLog("Webhook"),
 		pushMap:      pushMap,
-		echoooPush:   hookEchoooPush,
+		echoooPush:   nil,
 		messageDB:    newMessageDB(ctx),
 		groupService: group.NewService(ctx),
 		userService:  user.NewService(ctx),
@@ -646,7 +645,7 @@ func (w *Webhook) pushToEchoooApi(uid string, msgResp msgOfflineNotify) {
 		return
 	}
 	user, err := w.userService.GetUser(uid)
-	if err == nil {
+	if err == nil && w.echoooPush != nil {
 		giteeUid := user.GiteeUid
 		if giteeUid != "" {
 			contentType := msgResp.ContentType
