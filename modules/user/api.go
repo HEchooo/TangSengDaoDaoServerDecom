@@ -196,6 +196,7 @@ func (u *User) Route(r *wkhttp.WKHttp) {
 		v.GET("/user/gitee", u.gitee)            // gitee认证页面
 		v.GET("/user/oauth/gitee", u.giteeOAuth) // gitee登录
 		v.GET("/user/oauth/mall", u.mallOAuth)   // mall登录
+		v.GET("/user/oauth/decom", u.decomOAuth) // decom登录
 
 	}
 
