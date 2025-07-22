@@ -87,7 +87,7 @@ func (co *Conversation) Route(r *wkhttp.WKHttp) {
 	}
 
 	// mall调用不需要登录
-	mallConversation := r.Group("/v1/mall")
+	mallConversation := r.Group("/v1/decom")
 	{
 		// 查询用户是否有未读消息
 		mallConversation.GET("/conversation/haveUnRead", co.getUserUnreadConversation)
