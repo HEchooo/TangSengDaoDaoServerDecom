@@ -395,7 +395,8 @@ func (u *User) decomOAuth(c *wkhttp.Context) {
 		return
 	}
 	authcode := c.Query("state")
-	userInfo, err := u.requestDecomAccessToken(code, env)
+	referer := c.Request.Header.Get("Referer")
+	userInfo, err := u.requestDecomAccessToken(code, env, referer)
 	if err != nil {
 		c.ResponseError(err)
 		return
@@ -635,7 +636,7 @@ func (u *User) requestMallAccessToken(code string, env string) (*MallUser, error
 	return &response.Data, nil
 }
 
-func (u *User) requestDecomAccessToken(code string, env string) (*MallUser, error) {
+func (u *User) requestDecomAccessToken(code string, env string, referer string) (*MallUser, error) {
 	//cfg := u.ctx.GetConfig()
 
 	var url string = "https://decom-api.valleysound.xyz/user-service/user/get"
@@ -658,13 +659,8 @@ func (u *User) requestDecomAccessToken(code string, env string) (*MallUser, erro
 	req.Header.Set("Accept-Language", "zh_hant")
 	req.Header.Set("Platform", "IM")
 	req.Header.Set("User-Agent", "EchoooIMv1.0.0")
-	switch env {
-	case "dev":
-		req.Header.Set("Referer", "https://sep.decom.valleysound.xyz")
-	case "prod":
-		req.Header.Set("Referer", "https://w2c.buzz")
-	case "stage":
-		req.Header.Set("Referer", "https://stage.example.com")
+	if referer != "" {
+		req.Header.Set("Referer", referer)
 	}
 	req.Header.Set("Connection", "keep-alive")
 	req.Header.Set("Content-Type", "application/json")
