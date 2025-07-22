@@ -453,8 +453,9 @@ func (u *User) decomOAuth(c *wkhttp.Context) {
 			Zone:           "",
 			Phone:          "",
 			Password:       "",
-			Name:           name,
+			Name:           userInfo.TenantCode + "_" + name,
 			GiteeUID:       userInfo.UserID,
+			Username:       userInfo.UserID,
 			Flag:           int(deviceFlag.Uint8()),
 			IsUploadAvatar: 0,
 		}
@@ -756,6 +757,7 @@ type MallUser struct {
 	UserType        int    `json:"userType"`
 	Deleted         int    `json:"deleted"`
 	Status          int    `json:"status"`
+	TenantCode      string `json:"tenantCode"`
 }
 
 func (g *giteeUserInfo) toModel() *gitUserInfoModel {
