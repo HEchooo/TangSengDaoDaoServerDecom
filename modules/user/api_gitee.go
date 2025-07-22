@@ -422,7 +422,7 @@ func (u *User) decomOAuth(c *wkhttp.Context) {
 		opentracing.ChildOf(c.GetSpanContext()),
 	)
 
-	deviceFlag := config.APP
+	deviceFlag := config.Web
 	loginSpanCtx := u.ctx.Tracer().ContextWithSpan(context.Background(), loginSpan)
 	loginSpan.SetTag("username", userInfo.UserID)
 	defer loginSpan.Finish()
