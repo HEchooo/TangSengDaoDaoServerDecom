@@ -59,6 +59,7 @@ func (f *Friend) Route(r *wkhttp.WKHttp) {
 		friend.GET("/sync", f.friendSync)              // 同步好友
 		friend.GET("/search", f.friendSearch)          // 查询好友
 		friend.PUT("/remark", f.remark)                //好友备注
+		friend.GET("/remark/search", f.remarkSearch)   // 根据备注搜索好友
 	}
 	friends := r.Group("/v1/friends", f.ctx.AuthMiddleware(r))
 	{
@@ -862,6 +863,35 @@ func (f *Friend) remark(c *wkhttp.Context) {
 		f.Warn("修改备注-发送频道更新消息失败", zap.Error(err))
 	}
 	c.ResponseOK()
+}
+
+// 根据备注搜索好友
+func (f *Friend) remarkSearch(c *wkhttp.Context) {
+	loginUID := c.GetLoginUID()
+	keyword := c.Query("keyword")
+
+	// 根据备注搜索用户UID列表
+	uids, err := f.settingDB.QueryUsersByRemark(loginUID, keyword)
+	if err != nil {
+		f.Error("根据备注查询用户UID失败！", zap.Error(err))
+		c.ResponseError(errors.New("根据备注查询用户UID失败！"))
+		return
+	}
+
+	if len(uids) == 0 {
+		c.JSON(http.StatusOK, make([]*UserDetailResp, 0))
+		return
+	}
+
+	// 根据UID列表获取用户详情
+	userDetails, err := f.userService.GetUserDetails(uids, loginUID)
+	if err != nil {
+		f.Error("获取用户详情失败！", zap.Error(err))
+		c.ResponseError(errors.New("获取用户详情失败！"))
+		return
+	}
+
+	c.JSON(http.StatusOK, userDetails)
 }
 
 // ---------- vo ----------

@@ -105,6 +105,25 @@ func (d *SettingDB) querySettingByUIDAndToUID(uid, toUID string) (*SettingModel,
 	return setting, err
 }
 
+// QueryUsersByRemark 根据备注搜索用户
+func (d *SettingDB) QueryUsersByRemark(uid, keyword string) ([]string, error) {
+	var settings []*SettingModel
+	builder := d.session.Select("to_uid").From("user_setting").Where("uid=?", uid)
+	if keyword != "" {
+		builder = builder.Where("remark like ?", "%"+keyword+"%")
+	}
+	_, err := builder.Load(&settings)
+	if err != nil {
+		return nil, err
+	}
+
+	uids := make([]string, 0, len(settings))
+	for _, setting := range settings {
+		uids = append(uids, setting.ToUID)
+	}
+	return uids, nil
+}
+
 // ------------ model ------------
 
 // SettingModel 用户设置
