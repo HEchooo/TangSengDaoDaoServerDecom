@@ -1079,19 +1079,20 @@ func (u *User) sentWelcomeMsg(publicIP, uid, language string) {
 	if err != nil {
 		u.Error("获取应用配置错误", zap.Error(err))
 	}
-	onlineM, err := u.onlineDB.queryLastOnlineDeviceWithUID(uid)
-	var online int
+	onlineStr, err := u.ctx.Cache().Get(fmt.Sprintf("%s%s", "LAST:WELCOME:SENT", uid))
+	var online int64
 	sendMsg := false
 	//var lastOffline int
 	//var deviceFlag config.DeviceFlag
 	var lastOnlineTime time.Time
-	if onlineM != nil {
-		online = onlineM.LastOnline
+	if onlineStr != "" {
+		online, _ = strconv.ParseInt(onlineStr, 10, 64)
 		//lastOffline = onlineM.LastOffline
 		//deviceFlag = config.DeviceFlag(onlineM.DeviceFlag)
 		lastOnlineTime = time.Unix(int64(online), 0) // 将在线时间戳转换为 time.Time
 		if time.Since(lastOnlineTime) > 24*time.Hour {
 			sendMsg = true
+			u.ctx.Cache().SetAndExpire(fmt.Sprintf("%s%s", "LAST:WELCOME:SENT", uid), strconv.FormatInt(time.Now().Unix(), 10), 24*time.Hour)
 			//sendMsg = false
 		} else {
 			//sendMsg = false
