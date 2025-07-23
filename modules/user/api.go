@@ -1081,7 +1081,7 @@ func (u *User) sentWelcomeMsg(publicIP, uid, language string) {
 	}
 	onlineM, err := u.onlineDB.queryLastOnlineDeviceWithUID(uid)
 	var online int
-	sendMsg := true
+	sendMsg := false
 	//var lastOffline int
 	//var deviceFlag config.DeviceFlag
 	var lastOnlineTime time.Time
@@ -1095,7 +1095,7 @@ func (u *User) sentWelcomeMsg(publicIP, uid, language string) {
 			//sendMsg = false
 		} else {
 			//sendMsg = false
-			sendMsg = true
+			sendMsg = false
 			u.Log.Info("用户登入欢迎语24h内, 只发送一次.", zap.String("uid", uid))
 		}
 	}
