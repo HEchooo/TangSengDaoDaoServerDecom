@@ -627,11 +627,15 @@ func (w *Webhook) pushToEchoooApi(uid string, msgResp msgOfflineNotify) {
 			return
 		}
 		// 发送飞书通知
-		webhookURL := "https://open.feishu.cn/open-apis/bot/v2/hook/6d6ed11d-8685-4cd3-9faf-4cb7553ecb77"
+		webhookURL := w.ctx.GetConfig().EchoooPush.FeishuPushUrl
+		if webhookURL == "" {
+			log.Info("FeiShu webhook URL is empty")
+			return
+		}
 		// 示例 Webhook 负载
 		var payload FeiShuWebhookPayload
 		payload.MsgType = "text"
-		payload.Content.Text = "<at user_id=\"all\">所有人</at> 有等待超过10分钟的客服消息, 需要处理."
+		payload.Content.Text = "<at user_id=\"all\">所有人</at> Decom有等待超过10分钟的客服消息, 需要处理."
 
 		// 发送 Webhook
 		err2 := SendFeiShuWebhook(webhookURL, payload)

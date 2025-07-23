@@ -169,4 +169,4 @@ require (
 )
 
 // replace github.com/TangSengDaoDao/TangSengDaoDaoServerLib => ../TangSengDaoDaoServerLib
-replace github.com/TangSengDaoDao/TangSengDaoDaoServerLib => github.com/HEchooo/TangSengDaoDaoServerLib v0.0.2-20250723
+replace github.com/TangSengDaoDao/TangSengDaoDaoServerLib => github.com/HEchooo/TangSengDaoDaoServerLib v0.0.3-20250723

@@ -59,8 +59,8 @@ firebase.google.com/go/v4 v4.13.0/go.mod h1:e1/gaR6EnbQfsmTnAMx1hnz+ninJIrrr/RAh
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/DATA-DOG/go-sqlmock v1.5.0 h1:Shsta01QNfFxHCfpW6YH2STWB0MudeXXEWMr20OEh60=
-github.com/HEchooo/TangSengDaoDaoServerLib v0.0.2-20250723 h1:uxHH8IISXHNQoHSvvZwpvshFPHd9M4qUDL+qf8PunQk=
-github.com/HEchooo/TangSengDaoDaoServerLib v0.0.2-20250723/go.mod h1:47wmXX6Ny3ir4GNofoZ9zrEryOKve0/wgl4KMZeMnik=
+github.com/HEchooo/TangSengDaoDaoServerLib v0.0.3-20250723 h1:+BWAqaS29eirWybOkCpvRpZBNYyBnbrHFnAA8ns1z38=
+github.com/HEchooo/TangSengDaoDaoServerLib v0.0.3-20250723/go.mod h1:47wmXX6Ny3ir4GNofoZ9zrEryOKve0/wgl4KMZeMnik=
 github.com/HdrHistogram/hdrhistogram-go v1.1.2 h1:5IcZpTvzydCQeHzK4Ef/D5rrSqwxob0t8PQPMybUNFM=
 github.com/MicahParks/keyfunc v1.9.0 h1:lhKd5xrFHLNOWrDc4Tyb/Q1AJ4LCzQ48GVJyVIID3+o=
 github.com/MicahParks/keyfunc v1.9.0/go.mod h1:IdnCilugA0O/99dW+/MkvlyrsX8+L8+x95xuVNtM5jw=
