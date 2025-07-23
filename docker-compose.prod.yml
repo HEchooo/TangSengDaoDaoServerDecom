@@ -1,0 +1,104 @@
+version: '3.1'
+services:
+  # WuKongIM通讯服务
+  wukongim:
+    image: registry.cn-shanghai.aliyuncs.com/wukongim/wukongim:v1.2
+    restart: always
+    ports:
+      - "5001:5001"  # HTTP API端口 (内网)
+      - "5100:5100"  # TCP长连接端口 (外网)
+      - "5200:5200"  # WebSocket端口 (外网)
+      - "5300:5300"  # 监控端口
+    volumes:
+      - ./wukongim:/root/wukongim
+    env_file:
+      - .env
+    environment:
+      - WK_EXTERNAL_IP=${EXTERNAL_IP}
+      - WK_WEBHOOK_GRPCADDR=tangsengdaodaoserverdecom:6979
+      - WK_DATASOURCE_ADDR=http://tangsengdaodaoserverdecom:8090/v1/datasource
+      - WK_MODE=release
+      - WK_CONVERSATION_ON=true
+      - WK_DATASOURCE_CHANNELINFOON=true
+      - WK_TOKENAUTHON=true
+      - WK_WHITELISTOFFOFPERSON=false
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+
+  # 唐僧叨叨业务服务
+  tangsengdaodaoserverdecom:
+    image: 851725583589.dkr.ecr.us-east-1.amazonaws.com/tangsengdaodaoserverdecom:latest
+    restart: always
+    command: "api"
+    depends_on:
+      - wukongim
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./tsdd:/home/tsdddata
+      - ./tsdd/configs:/home/configs
+    env_file:
+      - .env
+    environment:
+      - TS_DB_MYSQLADDR=im:${MYSQL_PASSWORD}@tcp(${MYSQL_HOST})/${MYSQL_DATABASE}?charset=utf8mb4&parseTime=true&loc=Local
+      - TS_DB_REDISADDR=${REDIS_HOST}
+      - TS_WUKONGIM_APIURL=http://wukongim:5001
+      - TS_EXTERNAL_IP=${EXTERNAL_IP}
+      - TS_FILESERVICE=${TS_FILESERVICE}
+      - TS_MINIO_ACCESSKEYID=${MINIO_ROOT_USER}
+      - TS_MINIO_SECRETACCESSKEY=${MINIO_ROOT_PASSWORD}
+      - TS_ECHOOO_PUSH_SERVERADDRESSES=${ECHOOO_PUSH_SERVERADDRESSES}
+      - TS_MODE=release
+      - TS_EXTERNAL_BASEURL=${TS_EXTERNAL_BASEURL}
+      - WK_EXTERNAL_WSSADDR=${WK_EXTERNAL_WSSADDR}
+    healthcheck:
+      test: "wget -q -Y off -O /dev/null http://localhost:8090/v1/ping > /dev/null 2>&1"
+      interval: 10s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+
+  # Web管理端
+  tangsengdaodaomanager:
+    image: registry.cn-shanghai.aliyuncs.com/wukongim/tangsengdaodaomanager:latest
+    restart: always
+    depends_on:
+      - tangsengdaodaoserverdecom
+    environment:
+      - API_URL=http://tangsengdaodaoserverdecom:8090/
+    ports:
+      - "83:80"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "2"
+
+  # 可选：MinIO文件服务 (如果不使用AWS S3)
+  # minio:
+  #   image: minio/minio:RELEASE.2023-07-18T17-49-40Z
+  #   restart: always
+  #   command: "server /data --console-address ':9001'"
+  #   environment:
+  #     - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+  #     - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+  #   ports:
+  #     - "19000:9000"
+  #     - "19001:9001"
+  #   volumes:
+  #     - minio_data:/data
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "50m"
+  #       max-file: "2"
+
+# volumes:
+#   minio_data:

@@ -19,4 +19,30 @@ run-dev:
 stop-dev:
 	docker-compose stop
 env-test:
-	docker-compose -f ./testenv/docker-compose.yaml up -d 
+	docker-compose -f ./testenv/docker-compose.yaml up -d
+
+# 部署相关命令
+deploy-test:
+	./deploy.sh test
+deploy-prod:
+	./deploy.sh prod
+deploy-test-build:
+	./deploy.sh test -b
+deploy-prod-build:
+	./deploy.sh prod -b
+logs-test:
+	./deploy.sh test -l
+logs-prod:
+	./deploy.sh prod -l
+status-test:
+	./deploy.sh test -s
+status-prod:
+	./deploy.sh prod -s
+stop-test:
+	./deploy.sh test -d
+stop-prod:
+	./deploy.sh prod -d
+backup:
+	./deploy.sh test --backup
+clean:
+	./deploy.sh --clean 
