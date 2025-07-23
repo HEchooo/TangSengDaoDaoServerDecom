@@ -1099,6 +1099,9 @@ func (u *User) sentWelcomeMsg(publicIP, uid, language string) {
 			sendMsg = false
 			u.Log.Info("用户登入欢迎语24h内, 只发送一次.", zap.String("uid", uid))
 		}
+	} else {
+		sendMsg = true
+		u.ctx.Cache().SetAndExpire(fmt.Sprintf("%s%s", "LAST:WELCOME:SENT", uid), strconv.FormatInt(time.Now().Unix(), 10), 24*time.Hour)
 	}
 
 	if appconfig.SendWelcomeMessageOn == 0 && !sendMsg {
