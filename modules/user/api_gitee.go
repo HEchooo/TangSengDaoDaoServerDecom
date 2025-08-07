@@ -645,9 +645,9 @@ func (u *User) requestDecomAccessToken(code string, env string, referer string) 
 	case "dev":
 		url = "https://decom-api.valleysound.xyz/user-service/user/get"
 	case "prod":
-		url = "https://api.china2u.xyz/user-service/user/get"
+		url = "https://api.cn2u.xyz/user-service/user/get"
 	case "stage":
-		url = "https://stage-api.china2u.xyz/user-service/user/get"
+		url = "https://stage-api.cn2u.xyz/user-service/user/get"
 	}
 
 	req, err := http.NewRequest("GET", url, nil)
