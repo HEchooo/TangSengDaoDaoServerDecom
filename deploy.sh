@@ -134,7 +134,7 @@ build_image() {
 
 # 部署测试环境
 deploy_test() {
-    local compose_file="docker compose.yaml"
+    local compose_file="docker-compose.yaml"
     
     log_info "部署测试环境..."
     
@@ -158,7 +158,7 @@ deploy_test() {
 
 # 部署生产环境
 deploy_prod() {
-    local compose_file="docker compose.prod.yml"
+    local compose_file="docker-compose.prod.yml"
     
     log_info "部署生产环境..."
     
@@ -368,9 +368,9 @@ main() {
     check_dependencies
     
     # 设置compose文件
-    local compose_file="docker compose.yaml"
+    local compose_file="docker-compose.yaml"
     if [[ "$env_type" == "prod" ]]; then
-        compose_file="docker compose.prod.yml"
+        compose_file="docker-compose.prod.yml"
     fi
     
     # 构建镜像
