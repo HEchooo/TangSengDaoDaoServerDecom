@@ -423,6 +423,15 @@ func (u *User) decomOAuth(c *wkhttp.Context) {
 	)
 
 	deviceFlag := config.Web
+	platform := strings.TrimSpace(c.Request.Header.Get("Platfrom"))
+	switch strings.ToLower(platform) {
+	case "ios", "android":
+		deviceFlag = config.APP
+	case "pc":
+		deviceFlag = config.PC
+	default:
+		deviceFlag = config.Web
+	}
 	loginSpanCtx := u.ctx.Tracer().ContextWithSpan(context.Background(), loginSpan)
 	loginSpan.SetTag("username", userInfo.UserID)
 	defer loginSpan.Finish()
