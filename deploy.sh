@@ -67,7 +67,7 @@ check_dependencies() {
         exit 1
     fi
     
-    if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
+    if ! command -v docker compose &> /dev/null && ! docker compose version &> /dev/null; then
         log_error "Docker Compose 未安装，请先安装 Docker Compose"
         exit 1
     fi
@@ -134,7 +134,7 @@ build_image() {
 
 # 部署测试环境
 deploy_test() {
-    local compose_file="docker-compose.yaml"
+    local compose_file="docker compose.yaml"
     
     log_info "部署测试环境..."
     
@@ -143,7 +143,7 @@ deploy_test() {
     
     # 启动服务
     log_info "启动服务..."
-    docker-compose -f "$compose_file" up -d
+    docker compose -f "$compose_file" up -d
     
     # 等待服务启动
     log_info "等待服务启动..."
@@ -158,7 +158,7 @@ deploy_test() {
 
 # 部署生产环境
 deploy_prod() {
-    local compose_file="docker-compose.prod.yml"
+    local compose_file="docker compose.prod.yml"
     
     log_info "部署生产环境..."
     
@@ -177,11 +177,11 @@ deploy_prod() {
     
     # 拉取最新镜像
     log_info "拉取最新镜像..."
-    docker-compose -f "$compose_file" pull
+    docker compose -f "$compose_file" pull
     
     # 启动服务
     log_info "启动服务..."
-    docker-compose -f "$compose_file" up -d
+    docker compose -f "$compose_file" up -d
     
     # 等待服务启动
     log_info "等待服务启动..."
@@ -199,10 +199,10 @@ check_services() {
     local compose_file=$1
     
     log_info "检查服务状态..."
-    docker-compose -f "$compose_file" ps
+    docker compose -f "$compose_file" ps
     
     # 检查健康状态
-    local unhealthy_services=$(docker-compose -f "$compose_file" ps --format "table {{.Name}}\t{{.Status}}" | grep -v "Up" | grep -v "Name" || true)
+    local unhealthy_services=$(docker compose -f "$compose_file" ps --format "table {{.Name}}\t{{.Status}}" | grep -v "Up" | grep -v "Name" || true)
     
     if [[ -n "$unhealthy_services" ]]; then
         log_warn "以下服务状态异常:"
@@ -246,10 +246,10 @@ show_logs() {
     
     if [[ -n "$service" ]]; then
         log_info "显示 $service 服务日志..."
-        docker-compose -f "$compose_file" logs -f "$service"
+        docker compose -f "$compose_file" logs -f "$service"
     else
         log_info "显示所有服务日志..."
-        docker-compose -f "$compose_file" logs -f
+        docker compose -f "$compose_file" logs -f
     fi
 }
 
@@ -258,7 +258,7 @@ stop_services() {
     local compose_file=$1
     
     log_info "停止服务..."
-    docker-compose -f "$compose_file" down
+    docker compose -f "$compose_file" down
     
     log_info "服务已停止"
 }
@@ -271,15 +271,15 @@ backup_data() {
     mkdir -p "$backup_dir"
     
     # 备份MySQL数据
-    if docker-compose ps mysql | grep -q "Up"; then
+    if docker compose ps mysql | grep -q "Up"; then
         log_info "备份MySQL数据..."
-        docker-compose exec -T mysql mysqldump -u root -p"${MYSQL_ROOT_PASSWORD}" "${MYSQL_DATABASE}" > "$backup_dir/mysql_backup.sql"
+        docker compose exec -T mysql mysqldump -u root -p"${MYSQL_ROOT_PASSWORD}" "${MYSQL_DATABASE}" > "$backup_dir/mysql_backup.sql"
     fi
     
     # 备份Redis数据
-    if docker-compose ps redis | grep -q "Up"; then
+    if docker compose ps redis | grep -q "Up"; then
         log_info "备份Redis数据..."
-        docker-compose exec -T redis redis-cli --rdb - > "$backup_dir/redis_backup.rdb"
+        docker compose exec -T redis redis-cli --rdb - > "$backup_dir/redis_backup.rdb"
     fi
     
     # 备份MinIO数据
@@ -368,9 +368,9 @@ main() {
     check_dependencies
     
     # 设置compose文件
-    local compose_file="docker-compose.yaml"
+    local compose_file="docker compose.yaml"
     if [[ "$env_type" == "prod" ]]; then
-        compose_file="docker-compose.prod.yml"
+        compose_file="docker compose.prod.yml"
     fi
     
     # 构建镜像
