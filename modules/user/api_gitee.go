@@ -424,7 +424,7 @@ func (u *User) decomOAuth(c *wkhttp.Context) {
 	//add param log
 
 	deviceFlag := config.Web
-	platform := strings.TrimSpace(c.Request.Header.Get("Platfrom"))
+	platform := strings.TrimSpace(c.Request.Header.Get("Platform"))
 	switch strings.ToLower(platform) {
 	case "ios", "android":
 		deviceFlag = config.APP
