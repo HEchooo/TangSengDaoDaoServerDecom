@@ -421,6 +421,7 @@ func (u *User) decomOAuth(c *wkhttp.Context) {
 		"malllogin",
 		opentracing.ChildOf(c.GetSpanContext()),
 	)
+	//add param log
 
 	deviceFlag := config.Web
 	platform := strings.TrimSpace(c.Request.Header.Get("Platfrom"))
@@ -434,6 +435,7 @@ func (u *User) decomOAuth(c *wkhttp.Context) {
 	}
 	loginSpanCtx := u.ctx.Tracer().ContextWithSpan(context.Background(), loginSpan)
 	loginSpan.SetTag("username", userInfo.UserID)
+	u.Info("decomOAuth ", zap.String("token", code), zap.String("env", env), zap.String("platform", platform), zap.Any("deviceFlag", deviceFlag))
 	defer loginSpan.Finish()
 
 	var loginResp *loginUserDetailResp
