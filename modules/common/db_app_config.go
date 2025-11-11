@@ -44,6 +44,7 @@ type appConfigModel struct {
 	RevokeSecond                   int    // 消息可撤回时长
 	WelcomeMessage                 string // 登录欢迎语
 	WelcomeMessageEn               string // 登录欢迎语 English
+	WelcomeMessageTenant           string // 租户欢迎语配置(JSON格式,key是tenantCode_language,如T18002704_zh_CN,value是welcomeMessage)
 	NewUserJoinSystemGroup         int    // 新用户是否加入系统群聊
 	SearchByPhone                  int    // 是否可通过手机号搜索
 	RegisterInviteOn               int    // 开启注册邀请机制

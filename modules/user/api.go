@@ -1074,7 +1074,7 @@ func (u *User) execLogin(userInfo *Model, flag config.DeviceFlag, device *device
 }
 
 // sendWelcomeMsg 发送欢迎语
-func (u *User) sentWelcomeMsg(publicIP, uid, language string) {
+func (u *User) sentWelcomeMsg(publicIP, uid, language, tenantCode string) {
 	appconfig, err := u.commonService.GetAppConfig()
 	if err != nil {
 		u.Error("获取应用配置错误", zap.Error(err))
@@ -1113,9 +1113,46 @@ func (u *User) sentWelcomeMsg(publicIP, uid, language string) {
 	content := u.ctx.GetConfig().WelcomeMessage
 	var sentContent string
 
-	if appconfig != nil && appconfig.WelcomeMessage != "" {
-		content = appconfig.WelcomeMessage
+	// 标准化语言代码,如果没有语言或语言不是en_US,默认使用zh_CN
+	langCode := "zh_CN"
+	if language == "en_US" {
+		langCode = "en_US"
 	}
+
+	// 根据 tenantCode_language 组合key获取对应的欢迎语
+	if appconfig != nil && appconfig.WelcomeMessageTenant != "" {
+		var tenantMessages map[string]string
+		if err := json.Unmarshal([]byte(appconfig.WelcomeMessageTenant), &tenantMessages); err == nil {
+			// 构造组合key: tenantCode_language
+			tenantKey := fmt.Sprintf("%s_%s", tenantCode, langCode)
+			if tenantMsg, exists := tenantMessages[tenantKey]; exists && tenantMsg != "" {
+				content = tenantMsg
+			} else {
+				// fallback到默认欢迎语
+				if langCode == "en_US" && appconfig.WelcomeMessageEn != "" {
+					content = appconfig.WelcomeMessageEn
+				} else if appconfig.WelcomeMessage != "" {
+					content = appconfig.WelcomeMessage
+				}
+			}
+		} else {
+			u.Error("解析租户欢迎语配置失败", zap.Error(err))
+			// 解析失败,使用默认欢迎语
+			if langCode == "en_US" && appconfig.WelcomeMessageEn != "" {
+				content = appconfig.WelcomeMessageEn
+			} else if appconfig.WelcomeMessage != "" {
+				content = appconfig.WelcomeMessage
+			}
+		}
+	} else if appconfig != nil {
+		// 没有租户配置,使用默认欢迎语
+		if langCode == "en_US" && appconfig.WelcomeMessageEn != "" {
+			content = appconfig.WelcomeMessageEn
+		} else if appconfig.WelcomeMessage != "" {
+			content = appconfig.WelcomeMessage
+		}
+	}
+
 	if lastLoginLog != nil {
 		//ipStr := fmt.Sprintf("上次的登录信息：%s %s\n本次登录的信息：%s %s", lastLoginLog.LoginIP, lastLoginLog.CreateAt, publicIP, util.ToyyyyMMddHHmmss(time.Now()))
 		sentContent = fmt.Sprintf("%s", content)
@@ -1123,11 +1160,7 @@ func (u *User) sentWelcomeMsg(publicIP, uid, language string) {
 		//ipStr := fmt.Sprintf("本次登录的信息：%s %s", publicIP, util.ToyyyyMMddHHmmss(time.Now()))
 		sentContent = fmt.Sprintf("%s", content)
 	}
-	u.Log.Info("sentWelcomeMsg", zap.String("language", language))
-	if "en_US" == language {
-		content = appconfig.WelcomeMessageEn
-		sentContent = fmt.Sprintf("%s", content)
-	}
+	u.Log.Info("sentWelcomeMsg", zap.String("language", language), zap.String("tenantCode", tenantCode), zap.String("tenantKey", fmt.Sprintf("%s_%s", tenantCode, langCode)))
 
 	if sendMsg {
 		err = u.ctx.SendMessage(&config.MsgSendReq{
@@ -2444,10 +2477,21 @@ func (u *User) sendWelcomeMsgV1(c *wkhttp.Context) {
 	if publicIP == "" {
 		u.Log.Error("无法获取用户的公共IP")
 	}
+
+	// 获取Referer header来判断租户
+	referer := c.GetHeader("Referer")
+	androidPackage := c.GetHeader("Package")
+	tenantCode := ""
+	if androidPackage != "" || strings.Contains(referer, "cn2u.ai") || strings.Contains(referer, "alvin") {
+		tenantCode = "T18002704"
+	} else {
+		tenantCode = "T18002705"
+	}
+
 	// 使用 goroutine 异步发送欢迎消息
 	go func() {
 		language := c.GetHeader("Accept-Language")
-		u.sentWelcomeMsg(publicIP, loginUID, language)
+		u.sentWelcomeMsg(publicIP, loginUID, language, tenantCode)
 	}()
 
 	c.ResponseOK()
