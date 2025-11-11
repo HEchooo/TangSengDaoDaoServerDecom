@@ -2482,7 +2482,7 @@ func (u *User) sendWelcomeMsgV1(c *wkhttp.Context) {
 	referer := c.GetHeader("Referer")
 	androidPackage := c.GetHeader("Package")
 	tenantCode := ""
-	if androidPackage != "" || strings.Contains(referer, "cn2u.ai") || strings.Contains(referer, "alvin") {
+	if androidPackage != "" || strings.Contains(referer, "cn2u.ai") || strings.Contains(referer, "alvin") || strings.Contains(referer, "ai.decom") {
 		tenantCode = "T18002704"
 	} else {
 		tenantCode = "T18002705"
