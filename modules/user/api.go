@@ -1114,9 +1114,9 @@ func (u *User) sentWelcomeMsg(publicIP, uid, language, tenantCode string) {
 	var sentContent string
 
 	// 标准化语言代码,如果没有语言或语言不是en_US,默认使用zh_CN
-	langCode := "zh_CN"
-	if language == "en_US" {
-		langCode = "en_US"
+	langCode := "en_US"
+	if strings.HasPrefix(language, "zh") {
+		langCode = "zh_CN"
 	}
 
 	// 根据 tenantCode_language 组合key获取对应的欢迎语

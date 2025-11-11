@@ -61,6 +61,7 @@ func (s *service) GetAppConfig() (*AppConfigResp, error) {
 		SuperTokenOn:                   appConfigM.SuperTokenOn,
 		WelcomeMessage:                 appConfigM.WelcomeMessage,
 		WelcomeMessageEn:               appConfigM.WelcomeMessageEn,
+		WelcomeMessageTenant:           appConfigM.WelcomeMessageTenant,
 		NewUserJoinSystemGroup:         appConfigM.NewUserJoinSystemGroup,
 		SearchByPhone:                  appConfigM.SearchByPhone,
 		RegisterInviteOn:               appConfigM.RegisterInviteOn,
